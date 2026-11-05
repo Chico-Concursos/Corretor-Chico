@@ -1,0 +1,2539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chico Concursos - Corretor de Redação IA</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#121212">
+  <link rel="apple-touch-icon" href="https://img.icons8.com/color/96/books.png">
+  <link rel="icon" type="image/png" href="https://img.icons8.com/color/96/books.png">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #121212;
+      color: #FFD700;
+      font-family: 'Roboto', sans-serif;
+      text-align: center;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    button, select, .menu-item-row {
+      transition: all 0.2s ease !important;
+    }
+
+    button:active, .menu-item-row:active {
+      transform: scale(0.96) !important;
+    }
+
+    /* ============================================================ */
+    /* --- BARRA SUPERIOR ULTRACOMPACTA (HERDADA DO FC-178) ---     */
+    /* ============================================================ */
+    .top-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #1e1e1e;
+      padding: 4px 44px 4px 40px !important;
+      flex-wrap: wrap;
+      gap: 12px;
+      white-space: nowrap;
+      position: relative;
+      z-index: 100;
+      border-bottom: 1px solid #2a2a2a;
+    }
+
+    .top-bar button, .top-bar select {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.15em;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .top-bar button i, .hamburger-btn i {
+      color: #FFD700;
+      text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+    }
+
+    .top-bar span {
+      font-size: 0.95em;
+      color: white;
+    }
+
+    .brand-pill {
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      color: #FFD700 !important;
+      font-size: 1em !important;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Tooltips */
+    .top-bar .tooltip { position: relative; }
+    .top-bar .tooltip.show-tooltip::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 4px;
+      background: #222;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+      font-size: 0.75em;
+      border: 1px solid gold;
+      z-index: 10005;
+    }
+
+    @keyframes slideDownSimple {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Wrapper do Usuário (Idêntico ao FC-html) */
+    .header-user-wrapper {
+      position: absolute !important;
+      top: 50% !important;
+      right: 18px !important;
+      transform: translateY(-50%) !important;
+      z-index: 10006;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-user-icon {
+      background: none !important;
+      border: none !important;
+      color: #FFD700 !important;
+      font-size: 1.2em !important;
+      cursor: pointer;
+      padding: 4px !important;
+      margin: 0 !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1 !important;
+      transition: all 0.2s ease !important;
+    }
+
+    .header-user-icon:hover {
+      color: #F7EF8A !important;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.6) !important;
+      transform: scale(1.1) !important;
+    }
+
+    .user-dropdown-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: #111;
+      border: 1.5px solid #FFD700;
+      border-radius: 8px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.9);
+      padding: 14px 16px;
+      z-index: 20000;
+      min-width: 220px;
+      text-align: center;
+      animation: slideDownSimple 0.2s ease;
+    }
+
+    .user-dropdown-menu.active {
+      display: block;
+    }
+
+    .user-dropdown-email {
+      color: #F7EF8A;
+      font-size: 0.88rem;
+      margin-bottom: 12px;
+      font-weight: bold;
+      word-break: break-all;
+      display: block;
+      border-bottom: 1px solid #333;
+      padding-bottom: 8px;
+    }
+
+    .top-bar .btn-logout-dropdown,
+    .btn-logout-dropdown {
+      background: linear-gradient(135deg, #7A0000, #A10000) !important;
+      color: white !important;
+      border: 1px solid #ff4d4d !important;
+      padding: 8px 15px !important;
+      border-radius: 6px !important;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.9em !important;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease !important;
+      box-shadow: 0 2px 8px rgba(255, 77, 77, 0.3) !important;
+    }
+
+    .top-bar .btn-logout-dropdown i,
+    .btn-logout-dropdown i {
+      color: white !important;
+      text-shadow: none !important;
+    }
+
+    .top-bar .btn-logout-dropdown:hover,
+    .btn-logout-dropdown:hover {
+      background: #ff4d4d !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 12px rgba(255, 77, 77, 0.6) !important;
+    }
+
+    /* ============================================================ */
+    /* --- BARRA DE ETAPAS (STEPPER DO CORRETOR) ---                */
+    /* ============================================================ */
+    .stepper-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      background: #161616;
+      padding: 10px 15px;
+      border-bottom: 1px solid #2a2a2a;
+      flex-wrap: wrap;
+    }
+
+    .step-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.88em;
+      font-weight: 700;
+      color: #777;
+      background: #1f1f1f;
+      border: 1px solid #333;
+    }
+
+    .step-badge.active {
+      color: #0D0D09;
+      background: linear-gradient(135deg, #D2AC47, #F7EF8A, #AE8625);
+      border-color: #FFD700;
+      box-shadow: 0 0 12px rgba(210, 172, 71, 0.35);
+    }
+
+    .step-badge.done {
+      color: #2ecc71;
+      border-color: #2ecc71;
+      background: rgba(46, 204, 113, 0.1);
+    }
+
+    /* ============================================================ */
+    /* --- CONTAINER PRINCIPAL DO CORRETOR ---                      */
+    /* ============================================================ */
+    .main-workspace {
+      max-width: 1100px;
+      margin: 15px auto 60px auto;
+      padding: 0 12px;
+      text-align: left;
+    }
+
+    .gold-card {
+      background: #111111;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.85), 0 0 15px rgba(210, 172, 71, 0.08);
+      color: #EDEDED;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gold-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #D2AC47, transparent);
+    }
+
+    .section-title {
+      color: #FFD700;
+      font-size: 1.15em;
+      font-weight: 800;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #2a2a2a;
+      padding-bottom: 8px;
+    }
+
+    /* Botões Padrão Ouro Metálico (V-155) */
+    .btn-gold-primary {
+      background: linear-gradient(135deg, #D2AC47, #F7EF8A, #AE8625) !important;
+      color: #0D0D09 !important;
+      border: none !important;
+      padding: 12px 24px;
+      font-weight: 900 !important;
+      font-size: 1em;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(210, 172, 71, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-gold-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(210, 172, 71, 0.5) !important;
+    }
+
+    .btn-gold-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-dark-secondary {
+      background: #181818 !important;
+      color: #EDEDED !important;
+      border: 1px solid #3a3a3a !important;
+      padding: 10px 18px;
+      font-weight: 700;
+      font-size: 0.92em;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-dark-secondary:hover {
+      background: #242424 !important;
+      border-color: #FFD700 !important;
+      color: #FFD700 !important;
+    }
+
+    /* Seletores de Banca e Tema */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
+
+    .field-label {
+      display: block;
+      color: #F7EF8A;
+      font-size: 0.88em;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .chico-select, .chico-input, .chico-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background-color: #161616 !important;
+      color: #FFFFFF !important;
+      border: 1px solid #333 !important;
+      border-radius: 6px;
+      font-size: 0.96em;
+      font-family: 'Roboto', sans-serif;
+      outline: none;
+    }
+
+    .chico-select:focus, .chico-input:focus, .chico-textarea:focus {
+      border-color: #D2AC47 !important;
+      box-shadow: 0 0 8px rgba(210, 172, 71, 0.25);
+    }
+
+    /* Caixa de Tema e Textos Motivadores */
+    .theme-preview-box {
+      background: #161616;
+      border-left: 4px solid #FFD700;
+      padding: 14px;
+      border-radius: 0 8px 8px 0;
+      margin-top: 10px;
+    }
+
+    .theme-title-highlight {
+      color: #FFD700;
+      font-size: 1.08em;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .theme-motivator {
+      color: #ccc;
+      font-size: 0.92em;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    /* Zona de Upload / Câmera */
+    .upload-dropzone {
+      border: 2px dashed #D2AC47;
+      background: rgba(210, 172, 71, 0.05);
+      border-radius: 12px;
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      margin-top: 10px;
+    }
+
+    .upload-dropzone:hover {
+      background: rgba(210, 172, 71, 0.12);
+      border-color: #FFD700;
+    }
+
+    .upload-dropzone i {
+      font-size: 2.8em;
+      color: #FFD700;
+      margin-bottom: 10px;
+    }
+
+    /* Split View da Etapa 2 (Foto + Transcrição) */
+    .split-review-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    @media (max-width: 820px) {
+      .split-review-grid { grid-template-columns: 1fr; }
+    }
+
+    .photo-preview-wrapper {
+      background: #0b0b0b;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .photo-preview-wrapper img {
+      max-width: 100%;
+      max-height: 460px;
+      border-radius: 6px;
+      cursor: zoom-in;
+      border: 1px solid #444;
+    }
+
+    .transcription-editor {
+      min-height: 360px;
+      line-height: 1.65;
+      font-size: 1.05em;
+      resize: vertical;
+      font-family: 'Merriweather', serif;
+    }
+
+    /* Painel de Resultado (Etapa 3) */
+    .score-hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      background: linear-gradient(135deg, #19160c, #111111);
+      border: 1.5px solid #D2AC47;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+
+    .score-circle {
+      background: #0a0a0a;
+      border: 3px solid #FFD700;
+      border-radius: 12px;
+      padding: 14px 24px;
+      text-align: center;
+      min-width: 150px;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.25);
+    }
+
+    .score-number {
+      font-size: 2.4em;
+      font-weight: 900;
+      color: #FFD700;
+      line-height: 1;
+    }
+
+    .score-total {
+      font-size: 0.85em;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    .criterion-card {
+      background: #161616;
+      border: 1px solid #2b2b2b;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .criterion-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      color: #F7EF8A;
+      margin-bottom: 6px;
+    }
+
+    .criterion-bar-bg {
+      width: 100%;
+      height: 8px;
+      background: #2a2a2a;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .criterion-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #D2AC47, #2ecc71);
+      border-radius: 4px;
+    }
+
+    .error-item-box {
+      background: #1a1212;
+      border-left: 4px solid #ff5555;
+      padding: 12px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 10px;
+      font-size: 0.95em;
+    }
+
+    .wrong-snippet {
+      color: #ff7675;
+      text-decoration: line-through;
+      font-weight: bold;
+    }
+
+    .right-snippet {
+      color: #2ecc71;
+      font-weight: bold;
+    }
+
+    .model-paragraph-box {
+      background: #101d14;
+      border: 1px solid #2ecc71;
+      border-radius: 8px;
+      padding: 18px;
+      color: #e8f8ee;
+      font-family: 'Merriweather', serif;
+      line-height: 1.75;
+      font-size: 0.98em;
+      white-space: pre-wrap;
+    }
+
+    /* ============================================================ */
+    /* --- MODAIS E LOGIN PADRONIZADOS (HERDADOS DO FC-178) ---     */
+    /* ============================================================ */
+    .chico-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 100000 !important;
+      justify-content: center;
+      align-items: flex-start !important;
+      padding-top: 30px !important;
+      padding-bottom: 50px !important;
+      overflow-y: auto !important;
+      backdrop-filter: blur(5px);
+    }
+
+    .chico-modal-box {
+      background: #111111;
+      color: white;
+      padding: 24px;
+      border-radius: 10px;
+      max-width: 700px;
+      width: 92%;
+      border: 1px solid #2a2a2a;
+      box-shadow: 0 0 35px rgba(0, 0, 0, 0.95), 0 0 15px rgba(210, 172, 71, 0.15);
+      text-align: left;
+    }
+
+    .chico-modal-title {
+      color: gold;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 10px;
+      text-align: center;
+    }
+
+    /* === LAYOUT DE LOGIN (V57 Clean + Gold) === */
+    #loginModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 250000 !important;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 20px;
+      overflow-y: auto;
+      padding-left: 20px;
+      padding-right: 20px;
+      padding-bottom: 40px;
+      box-sizing: border-box;
+    }
+
+    .login-container-clean {
+      background-color: #050505;
+      padding: 40px 30px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 360px;
+      border: 1px solid #222;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+
+    .login-container-clean::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #FFD700, transparent);
+    }
+
+    .login-logo-clean {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 900;
+      font-size: 1.6rem;
+      color: white;
+      margin-bottom: 5px;
+      letter-spacing: 1px;
+    }
+
+    .login-logo-clean span {
+      background: linear-gradient(135deg, #D2AC47, #F7EF8A, #AE8625);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: #FFD700;
+    }
+
+    .login-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #666;
+      margin-bottom: 30px;
+      border: 1px solid #333;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      margin-bottom: 15px;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #D2AC47;
+      font-size: 0.9rem;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .login-container-clean input {
+      width: 100%;
+      height: 45px;
+      padding: 0 15px 0 40px;
+      background-color: #111 !important;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: white !important;
+      font-size: 0.9rem;
+      outline: none;
+      transition: 0.3s;
+      box-sizing: border-box;
+    }
+
+    .login-container-clean input:focus {
+      border-color: #D2AC47;
+      box-shadow: 0 0 10px rgba(210, 172, 71, 0.1);
+      background-color: #000 !important;
+    }
+
+    /* Remove o fundo amarelo do navegador (autofill) */
+    .login-container-clean input:-webkit-autofill,
+    .login-container-clean input:-webkit-autofill:hover,
+    .login-container-clean input:-webkit-autofill:focus,
+    .login-container-clean input:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 30px #111 inset !important;
+      -webkit-text-fill-color: white !important;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+
+    .login-button-clean {
+      width: 100%;
+      height: 45px;
+      margin-top: 15px;
+      background: linear-gradient(135deg, #D2AC47, #F7EF8A, #AE8625);
+      border: none;
+      border-radius: 8px;
+      color: #000;
+      font-weight: 800;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: 0.3s;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 15px rgba(210, 172, 71, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-button-clean:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(210, 172, 71, 0.4);
+    }
+
+    /* Estado Carregando (Botão vira círculo) */
+    .login-button-clean:disabled {
+      width: 45px !important;
+      height: 45px !important;
+      border-radius: 50% !important;
+      padding: 0 !important;
+      background: transparent !important;
+      border: 2px solid rgba(210, 172, 71, 0.3) !important;
+      transform: none !important;
+      animation: none !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      cursor: wait;
+      box-shadow: none !important;
+      position: relative !important;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .login-button-clean:disabled span,
+    .login-button-clean:disabled #loginBtnText {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
+    .spinner {
+      display: none;
+      width: 24px;
+      height: 24px;
+      border: 3px solid transparent;
+      border-radius: 50%;
+      border-top-color: #D2AC47;
+      margin: 0 auto;
+    }
+
+    @keyframes spinForce {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .login-button-clean:disabled .spinner {
+      display: block !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      margin: auto !important;
+      width: 24px !important;
+      height: 24px !important;
+      border: 3px solid transparent !important;
+      border-top-color: #D2AC47 !important;
+      border-radius: 50% !important;
+      animation: spinForce 1s ease-in-out infinite !important;
+    }
+
+    #loginError {
+      color: #ff7675;
+      margin-top: 18px;
+      display: none;
+      font-weight: 500;
+      background: rgba(231, 76, 60, 0.15);
+      border: 1px solid rgba(231, 76, 60, 0.3);
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.92em;
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    /* Spinner e Indicador de Carregamento */
+    .loading-indicator {
+      display: none;
+      position: fixed;
+      top: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200001;
+      background: rgba(15, 15, 15, 0.96);
+      border: 1.5px solid #FFD700;
+      padding: 24px 32px;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
+      text-align: center;
+    }
+    .loading-spinner {
+      width: 46px; height: 46px;
+      border: 4px solid rgba(255, 215, 0, 0.25);
+      border-radius: 50%;
+      border-top-color: #FFD700;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Lightbox de Zoom */
+    #lightboxModal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 220000 !important;
+      display: none;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 40px;
+      cursor: zoom-out;
+    }
+    #lightboxImage {
+      max-width: 95%;
+      max-height: 90vh;
+      border: 2px solid gold;
+      border-radius: 6px;
+      object-fit: contain;
+    }
+
+    /* Toasts In-DOM */
+    #chicoToastContainer {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 300000 !important;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      pointer-events: none;
+      width: 90%;
+      max-width: 440px;
+    }
+    .chico-toast {
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 20px;
+      border-radius: 8px;
+      background: rgba(18, 18, 18, 0.96);
+      color: #fff;
+      font-size: 0.95em;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+      opacity: 0;
+      transform: translateY(-15px);
+      transition: all 0.3s ease;
+    }
+    .chico-toast.visible { opacity: 1; transform: translateY(0); }
+    .chico-toast-info { border: 1px solid #FFD700; }
+    .chico-toast-info i { color: #FFD700; }
+    .chico-toast-success { border: 1px solid #2ecc71; }
+    .chico-toast-success i { color: #2ecc71; }
+    .chico-toast-warning { border: 1px solid #f39c12; }
+    .chico-toast-warning i { color: #f39c12; }
+    .chico-toast-error { border: 1px solid #ff4d4d; }
+    .chico-toast-error i { color: #ff4d4d; }
+
+    #sessionExpiredModal, #concurrentSessionModal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.92);
+      z-index: 250000 !important;
+      display: none;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 40px;
+    }
+    .session-expired-container {
+      background: #151515;
+      border: 1px solid #ff4d4d;
+      padding: 28px;
+      border-radius: 10px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- BARRA SUPERIOR -->
+  <div class="top-bar" role="toolbar" aria-label="Barra de ferramentas principal">
+    <span class="brand-pill"><i class="fas fa-pen-nib"></i> CORRETOR CHICO IA</span>
+
+    <span id="streakDisplay" class="tooltip" data-tooltip="Ofensiva (Dias seguidos)"
+      onmouseover="showTooltipOnHover(this)" onmouseleave="hideTooltipOnLeave(this)"
+      style="color: #ff4500; font-weight: bold; cursor:default;">🔥 0</span>
+
+    <span id="desktopTimer" class="tooltip" data-tooltip="Tempo de Prova (Clique p/ zerar)"
+      onmouseover="showTooltipOnHover(this)" onmouseleave="hideTooltipOnLeave(this)" onclick="resetTimer()"
+      style="cursor:pointer;">⏱️ <span id="timer">00:00</span></span>
+
+    <button class="tooltip" data-tooltip="Minhas Redações Corrigidas" onmouseover="showTooltipOnHover(this)"
+      onmouseleave="hideTooltipOnLeave(this)" onclick="openHistoryModal()">
+      <i class="fas fa-history"></i>
+    </button>
+
+    <div class="header-user-wrapper">
+      <button class="header-user-icon" onclick="toggleUserMenu(event)" title="Minha Conta">
+        <i class="fas fa-user-circle"></i>
+      </button>
+      <div id="userDropdownMenu" class="user-dropdown-menu">
+        <span id="headerUserEmail" class="user-dropdown-email">Carregando...</span>
+        <button class="btn-logout-dropdown" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i> Sair do Sistema
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BARRA DE ETAPAS (STEPPER) -->
+  <div class="stepper-bar">
+    <div id="stepBadge1" class="step-badge active">
+      <i class="fas fa-camera"></i> 1. Tema & Foto da Redação
+    </div>
+    <div id="stepBadge2" class="step-badge">
+      <i class="fas fa-spell-check"></i> 2. Conferir Leitura (OCR)
+    </div>
+    <div id="stepBadge3" class="step-badge">
+      <i class="fas fa-award"></i> 3. Correção & Nota da Banca
+    </div>
+  </div>
+
+  <!-- ÁREA DE TRABALHO PRINCIPAL -->
+  <div class="main-workspace">
+
+    <!-- ================================================================== -->
+    <!-- ETAPA 1: ESCOLHA DA BANCA/TEMA + UPLOAD DA FOTO MANUSCRITA          -->
+    <!-- ================================================================== -->
+    <div id="step1Container">
+      <div class="gold-card">
+        <div class="section-title" style="flex-wrap: wrap; gap: 8px;">
+          <span><i class="fas fa-balance-scale"></i> 1. Proposta de Redação & Radar Preditivo</span>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn-gold-primary" onclick="togglePredictiveGenerator()" style="padding: 5px 12px; font-size: 0.78em;">
+              <i class="fas fa-bolt"></i> Radar Preditivo IA (Gerar Tema)
+            </button>
+            <button class="btn-dark-secondary" onclick="toggleRubricDetails()" style="padding: 5px 12px; font-size: 0.78em;">
+              <i class="fas fa-eye"></i> Ver Espelho da Banca
+            </button>
+          </div>
+        </div>
+
+        <!-- Painel Expansível do Gerador de Temas Preditivos por IA -->
+        <div id="predictiveGeneratorBox" style="display:none; background:#19160c; border:1px solid #D2AC47; border-radius:8px; padding:14px; margin-bottom:16px;">
+          <div style="color:#FFD700; font-weight:800; font-size:0.95em; margin-bottom:8px;">
+            <i class="fas fa-compass"></i> Gerador de Propostas Preditivas (Padrão CRS / PMMG)
+          </div>
+          <p style="color:#ccc; font-size:0.85em; margin-bottom:12px; line-height:1.4;">
+            Crie um tema inédito com alta probabilidade de cobrança ou adapte questões discursivas já aplicadas em outras Polícias Militares do Brasil para a realidade da PMMG:
+          </p>
+          <div class="form-grid" style="margin-bottom:10px;">
+            <div>
+              <label class="field-label" for="aiThemeModeSelect">Modalidade da Proposta:</label>
+              <select id="aiThemeModeSelect" class="chico-select">
+                <option value="preditivo_inedito">🎯 Tema Preditivo Inédito (Foco CRS / PMMG)</option>
+                <option value="adaptado_outras_pms">🛡️ Tema Cobrado em Outra PM do Brasil (Adaptado p/ PMMG)</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label" for="aiThemeAxisSelect">Eixo Temático de Segurança Pública:</label>
+              <select id="aiThemeAxisSelect" class="chico-select">
+                <option value="Tecnologia, Inteligência Artificial, Câmeras Corporais e Crimes Cibernéticos">1. Tecnologia, IA e Crimes Cibernéticos</option>
+                <option value="Direitos Humanos, Grupos Vulneráveis e Uso Diferenciado da Força">2. Direitos Humanos e Uso Seletivo da Força</option>
+                <option value="Polícia Comunitária, Prevenção Criminal e Preservação da Ordem Pública">3. Polícia Comunitária e Ordem Pública</option>
+                <option value="Ética Militar, Hierarquia, Disciplina e Saúde Mental do Policial">4. Ética Militar e Saúde Mental do Policial</option>
+                <option value="Enfrentamento ao Crime Organizado, Integração Policial e Fronteiras">5. Combate ao Crime Organizado e Integração</option>
+                <option value="Sorteio Livre entre os temas mais atuais da Segurança Pública Brasileira">🎲 Sorteio Livre (Deixar a IA escolher)</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap;">
+            <button class="btn-dark-secondary" onclick="togglePredictiveGenerator()" style="padding:7px 14px; font-size:0.84em;">
+              Fechar
+            </button>
+            <button id="btnGenerateThemeAI" class="btn-gold-primary" onclick="generatePredictiveThemeWithAI()" style="padding:7px 16px; font-size:0.84em;">
+              <i class="fas fa-magic"></i> Gerar Proposta Agora
+            </button>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div>
+            <label class="field-label" for="categoryFilterSelect">1º) Filtrar por Origem do Tema:</label>
+            <select id="categoryFilterSelect" class="chico-select" onchange="filterRubricsByCategory()">
+              <option value="TODAS">📚 Todas as Categorias de Temas</option>
+              <option value="OFICIAL_PMMG">🏆 Já Cobrados pela CRS / PMMG (Provas Anteriores)</option>
+              <option value="ADAPTADO_PMS">🛡️ Cobrados em Outras PMs (Adaptados à PMMG)</option>
+              <option value="PREDITIVO_CRS">🎯 Radar Preditivo (Temas Inéditos para Treino)</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Exigências Edital CRS / PMMG:</label>
+            <div id="limitsInfoBox" style="padding: 10px 12px; background: #161616; border: 1px solid #333; border-radius: 6px; color: #FFD700; font-weight: bold; font-size: 0.88em;">
+              Título Obrigatório | Mín: 120 palavras (26–30 linhas) | Máx: 30 linhas | 100 pts
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label class="field-label" for="bancaSelect">2º) Escolha a Proposta de Redação:</label>
+          <select id="bancaSelect" class="chico-select" onchange="handleBancaChange()">
+            <option value="">Carregando bancas e temas...</option>
+          </select>
+        </div>
+
+        <div class="theme-preview-box">
+          <div id="themeCategoryBadge" style="display:inline-block; font-size:0.75em; font-weight:800; color:#0D0D09; background:#FFD700; padding:2px 8px; border-radius:4px; margin-bottom:6px;">
+            ACERCO CHICO CONCURSOS
+          </div>
+          <div id="themeTitleDisplay" class="theme-title-highlight">Selecione um tema acima</div>
+          <div id="themeMotivatorDisplay" class="theme-motivator">Os textos motivadores e instruções aparecerão aqui.</div>
+          <div id="rubricCriteriaDisplay" style="display:none; margin-top:12px; padding-top:10px; border-top:1px dashed #444; color:#a8e6cf; font-size:0.88em; white-space:pre-wrap;"></div>
+        </div>
+      </div>
+
+      <div class="gold-card">
+        <div class="section-title">
+          <span><i class="fas fa-camera-retro"></i> 2. Envie a Foto da sua Redação Manuscrita</span>
+        </div>
+        <p style="color:#bbb; font-size:0.92em; margin-bottom:10px;">
+          Tire uma foto nítida, de cima para baixo e em local iluminado. O sistema comprime a imagem automaticamente para envio rápido.
+        </p>
+
+        <input type="file" id="essayPhotoInput" accept="image/*" style="display:none;" onchange="handlePhotoSelected(event)">
+
+        <div class="upload-dropzone" onclick="document.getElementById('essayPhotoInput').click()">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <h3 style="color:#fff; margin-bottom:6px;">Toque aqui para Tirar Foto ou Escolher Imagem</h3>
+          <p style="color:#999; font-size:0.88em;">Formatos aceitos: JPG, PNG, HEIC (Celular ou Computador)</p>
+        </div>
+
+        <div id="step1PreviewArea" style="display:none; margin-top:18px; text-align:center;">
+          <img id="step1Thumb" src="" alt="Prévia da Redação" onclick="openLightbox(this.src)"
+            style="max-height: 280px; max-width: 100%; border-radius: 8px; border: 2px solid #D2AC47; cursor: zoom-in; margin-bottom: 12px;">
+          <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+            <button class="btn-dark-secondary" onclick="document.getElementById('essayPhotoInput').click()">
+              <i class="fas fa-sync-alt"></i> Trocar Foto
+            </button>
+            <button id="btnRunOCR" class="btn-gold-primary" onclick="runStep1OCR()">
+              <i class="fas fa-magic"></i> Ler Manuscrito com IA (Etapa 1)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- ETAPA 2: CONFERÊNCIA DO ALUNO (FOTO LADO A LADO COM O TEXTO LIDO)   -->
+    <!-- ================================================================== -->
+    <div id="step2Container" style="display:none;">
+      <div class="gold-card">
+        <div class="section-title">
+          <span><i class="fas fa-spell-check"></i> Conferência da Leitura (OCR Diplomático)</span>
+          <span id="ocrProviderBadge" style="font-size:0.78em; color:#2ecc71; background:rgba(46,204,113,0.12); padding:4px 10px; border-radius:12px;">IA Pronta</span>
+        </div>
+
+        <div style="background: rgba(255, 215, 0, 0.1); border-left: 4px solid #FFD700; padding: 12px; border-radius: 0 6px 6px 0; margin-bottom: 16px; font-size: 0.92em; color: #f5f5f5;">
+          <strong>⚠️ Importante:</strong> A IA transcreveu sua letra exatamente como leu na foto (sem corretor automático). 
+          Confira ao lado se alguma palavra saiu truncada por causa da caligrafia ou iluminação antes de gerar a nota.
+        </div>
+
+        <div class="split-review-grid">
+          <!-- Coluna Esquerda: Foto com Zoom e Contagem de Linhas -->
+          <div class="photo-preview-wrapper">
+            <p style="font-size:0.82em; color:#aaa; margin-bottom:6px;"><i class="fas fa-search-plus"></i> Clique na foto para ampliar</p>
+            <img id="step2Photo" src="" alt="Foto Manuscrita" onclick="openLightbox(this.src)">
+
+            <div style="margin-top:12px; text-align:left; background:#141414; padding:10px; border-radius:6px; border:1px solid #2a2a2a;">
+              <label class="field-label" for="confirmedLineCount">Total de Linhas Escritas:</label>
+              <input type="number" id="confirmedLineCount" class="chico-input" min="1" max="60" value="25">
+              <div id="visualObservationNote" style="font-size:0.82em; color:#bbb; margin-top:8px;"></div>
+            </div>
+          </div>
+
+          <!-- Coluna Direita: Texto Transcrito Editável -->
+          <div>
+            <label class="field-label" for="transcribedTextarea">Texto Lido pela IA (Você pode ajustar falhas de leitura da câmera):</label>
+            <textarea id="transcribedTextarea" class="chico-textarea transcription-editor" oninput="updateLiveTextMetrics()" placeholder="A transcrição aparecerá aqui..."></textarea>
+            <div id="liveMetricsBar" style="margin-top:8px; padding:8px 12px; background:#141414; border:1px solid #2a2a2a; border-radius:6px; font-size:0.84em; color:#ccc; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+              <span id="liveWordCountBadge">📝 Palavras: 0 (Mínimo CRS: 120)</span>
+              <span id="liveTitleStatusBadge">📌 Título: Verificando...</span>
+              <span id="liveStructureHintBadge">📐 Meta: 5–9–9–5 (28 linhas)</span>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; gap:12px; margin-top:14px; flex-wrap:wrap;">
+              <button class="btn-dark-secondary" onclick="goToStep(1)">
+                <i class="fas fa-arrow-left"></i> Voltar p/ Foto
+              </button>
+              <button id="btnRunGrade" class="btn-gold-primary" onclick="runStep2Grading()">
+                <i class="fas fa-check-double"></i> Confirmar e Corrigir pela Banca
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- ETAPA 3: RELATÓRIO OFICIAL DE CORREÇÃO E NOTA                      -->
+    <!-- ================================================================== -->
+    <div id="step3Container" style="display:none;">
+      <div class="score-hero">
+        <div style="flex: 1; min-width: 240px;">
+          <div id="gradeProviderBadge" style="display:inline-block; font-size:0.78em; color:#FFD700; border:1px solid #FFD700; padding:2px 10px; border-radius:12px; margin-bottom:8px;">
+            Banca Examinadora IA
+          </div>
+          <h2 id="resultBancaTitle" style="color:#fff; font-size:1.35em; margin-bottom:6px;">Resultado Oficial da Correção</h2>
+          <p id="resultSummaryText" style="color:#ccc; font-size:0.95em; line-height:1.5;"></p>
+
+          <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn-dark-secondary" onclick="resetForNewEssay()" style="padding:8px 16px; font-size:0.88em;">
+              <i class="fas fa-plus"></i> Enviar Nova Redação
+            </button>
+            <button class="btn-dark-secondary" onclick="regradeFromScratch()" style="padding:8px 14px; font-size:0.82em; opacity:0.85;" title="Ignorar memória de consistência e solicitar nova leitura do zero à IA">
+              <i class="fas fa-sync-alt"></i> Reavaliar do Zero com IA
+            </button>
+          </div>
+        </div>
+
+        <div class="score-circle">
+          <div id="finalScoreValue" class="score-number">0</div>
+          <div id="finalScoreMax" class="score-total">de 100 pontos</div>
+        </div>
+      </div>
+
+      <!-- Critérios e Pesos da Banca -->
+      <div class="gold-card">
+        <div class="section-title">
+          <span><i class="fas fa-tasks"></i> Desempenho por Critério da Banca</span>
+        </div>
+        <div id="criteriaBreakdownList"></div>
+      </div>
+
+      <!-- Desvios Gramaticais e Correções Linha a Linha -->
+      <div class="gold-card">
+        <div class="section-title">
+          <span><i class="fas fa-highlighter"></i> Apontamentos e Correções Detalhadas</span>
+        </div>
+        <div id="detailedErrorsList"></div>
+      </div>
+
+      <!-- Pontos Fortes e Pontos a Melhorar -->
+      <div class="form-grid">
+        <div class="gold-card" style="margin-bottom:0;">
+          <div class="section-title"><span style="color:#2ecc71;"><i class="fas fa-thumbs-up"></i> Pontos Fortes</span></div>
+          <ul id="strengthsList" style="padding-left:18px; line-height:1.6; color:#ccc; font-size:0.94em;"></ul>
+        </div>
+        <div class="gold-card" style="margin-bottom:0;">
+          <div class="section-title"><span style="color:#f39c12;"><i class="fas fa-bullseye"></i> O que Melhorar</span></div>
+          <ul id="improvementsList" style="padding-left:18px; line-height:1.6; color:#ccc; font-size:0.94em;"></ul>
+        </div>
+      </div>
+
+      <!-- Redação Integral Reescrita Padrão Nota Máxima -->
+      <div class="gold-card" style="margin-top:18px;">
+        <div class="section-title">
+          <span><i class="fas fa-star"></i> Sua Redação Reescrita (Padrão Nota Máxima)</span>
+        </div>
+        <p style="color:#aaa; font-size:0.88em; margin-bottom:10px;">
+          Veja como a sua redação inteira ficaria reescrita mantendo os seus argumentos, mas corrigindo os desvios e aplicando a estrutura de nota máxima desta banca:
+        </p>
+        <div id="modelParagraphBox" class="model-paragraph-box"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL DE HISTÓRICO DE REDAÇÕES -->
+  <div id="historyModal" class="chico-modal-overlay" role="dialog" aria-modal="true">
+    <div class="chico-modal-box">
+      <h2 class="chico-modal-title"><i class="fas fa-history"></i> Meu Histórico de Redações</h2>
+      <div id="historyListContainer" style="max-height: 60vh; overflow-y: auto;">
+        <p style="text-align:center; color:#888;">Carregando histórico...</p>
+      </div>
+      <div style="text-align:center; margin-top:18px;">
+        <button class="btn-dark-secondary" onclick="document.getElementById('historyModal').style.display='none'">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE LOGIN (IDÊNTICO AO FC-178) -->
+  <div id="loginModal" style="display: flex;" role="dialog" aria-modal="true" aria-label="Login">
+    <div class="login-container-clean">
+      <div class="login-logo-clean">CHICO <span>CONCURSOS</span></div>
+      <div class="login-badge">CORRETOR DE REDAÇÃO IA</div>
+      <form id="loginForm" onsubmit="login(event)">
+        <div class="input-wrapper">
+          <i class="fas fa-envelope input-icon"></i>
+          <input type="email" id="loginEmail" required placeholder="Digite seu e-mail" autocomplete="off">
+        </div>
+        <div class="input-wrapper">
+          <i class="fas fa-lock input-icon"></i>
+          <input type="password" id="loginPassword" required placeholder="Sua senha de acesso">
+        </div>
+        <button type="submit" class="login-button-clean" id="loginSubmitBtn">
+          <span id="loginBtnText">ENTRAR</span>
+          <div class="spinner" id="loginSpinner"></div>
+        </button>
+      </form>
+      <div id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- INDICADOR DE CARREGAMENTO -->
+  <div class="loading-indicator" id="loadingIndicator">
+    <div class="loading-spinner"></div>
+    <div class="loading-text" id="loadingText" style="color:#FFD700; font-weight:bold;">Processando...</div>
+  </div>
+
+  <!-- SESSÃO EXPIRADA & SESSÃO SIMULTÂNEA -->
+  <div id="sessionExpiredModal" role="alertdialog" aria-modal="true">
+    <div class="session-expired-container">
+      <h2 style="color:#ff5555; margin-bottom:14px;"><i class="fas fa-exclamation-triangle"></i> Sessão Expirada</h2>
+      <p style="margin-bottom:18px;">Sua sessão expirou por inatividade. Faça login novamente.</p>
+      <button class="btn-gold-primary" onclick="location.reload()" style="width:100%;">Fazer Login Novamente</button>
+    </div>
+  </div>
+
+  <div id="concurrentSessionModal" role="alertdialog" aria-modal="true">
+    <div class="session-expired-container">
+      <h2 style="color:#ff4d4d; margin-bottom:14px;"><i class="fas fa-user-lock"></i> Acesso Interrompido</h2>
+      <p style="margin-bottom:18px;">Sua conta foi conectada em outro dispositivo.</p>
+      <button class="btn-logout-dropdown" onclick="logout()">ENTENDI, SAIR AGORA</button>
+    </div>
+  </div>
+
+  <!-- LIGHTBOX DE ZOOM -->
+  <div id="lightboxModal" onclick="closeLightbox()">
+    <img id="lightboxImage" src="" alt="Zoom da Redação">
+  </div>
+
+  <!-- SCRIPTS DO SISTEMA -->
+  <script>
+    // ========================================================================
+    // MÓDULO 1: CONFIGURAÇÃO E CONEXÃO (MESMA INFRAESTRUTURA DO FC-178)
+    // ========================================================================
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz1SfudKlf4Bs75QZQWLOtvhUhooEY4JahLIAYCvZSG5Gt4Q3V4wVVFfYdHZCsUvuGk/exec";
+    const SUPABASE_URL = "https://undfphhyptxskeuffoqt.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_HJY9SONBEzOh4i4wSm-MgQ_2k7dh0hG";
+    const supabaseClient = (typeof window.supabase !== 'undefined' && window.supabase.createClient)
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+      : null;
+
+    // Endpoint da Edge Function Multi-IA de Redação
+    const ESSAY_AI_BACKEND_URL = `${SUPABASE_URL}/functions/v1/corretor-chico`;
+
+    function getQueryParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+
+    const SHEET_ID = getQueryParam('sheetId') || (getQueryParam('id') && getQueryParam('id').length > 25 ? getQueryParam('id') : '');
+
+    let isAuthenticated = false;
+    let userEmail = '';
+    let userAllowedCourses = [];
+    let isForceRefreshLogin = false;
+    const SESSION_DURATION = 3 * 60 * 60 * 1000;
+    let sessionTimer = null;
+    let sessionHeartbeat = null;
+    let failedHeartbeatCount = 0;
+
+    // Estado do Corretor
+    let allLoadedRubrics = [];
+    let availableRubrics = [];
+    let selectedRubric = null;
+    let compressedImageBase64 = null;
+    let lastGradingResult = null;
+    let timerSeconds = 0;
+
+    const PADRAO_CRITERIOS_CRS = "MATRIZ OFICIAL CRS / PMMG (Edital DRH/CRS nº 02/2026 - 100 Pontos):\n" +
+      "• GRAMÁTICA (60 pts — desconta 1,0 pt por erro; erro ortográfico idêntico conta só 1 vez):\n" +
+      "  1. O — Ortografia (20 pts)\n" +
+      "  2. MS — Morfossintaxe (20 pts)\n" +
+      "  3. P — Pontuação (20 pts)\n" +
+      "• CONTEÚDO (40 pts — 5 quesitos de 8,0 pts cada):\n" +
+      "  4. Conteúdo I — Pertinência ao tema proposto (8 pts)\n" +
+      "  5. Conteúdo II — Argumentação coerente das ideias e informatividade (8 pts)\n" +
+      "  6. Conteúdo III — Adequação do uso de articuladores no início de §§ e após cada ponto final (8 pts)\n" +
+      "  7. Conteúdo IV — Organização adequada de parágrafos na estrutura 5-9-9-5 (8 pts)\n" +
+      "  8. Conteúdo V — Propriedade vocabular e uso correto de siglas (8 pts)\n" +
+      "• REGRAS FORMAIS: Título obrigatório (-1 pt sem título) | Mínimo 120 palavras (-1 pt/palavra faltante) | Máximo 30 linhas (-5 pts/linha excedente) | Rasura entre parênteses (--erro--) não desconta ponto.";
+
+    const INSTRUCAO_PADRAO_CRS = "Redija um texto dissertativo-argumentativo em norma-padrão da língua portuguesa sobre o tema proposto. Dê um TÍTULO à sua redação (a linha do título não conta nas 30 linhas). Respeite o mínimo de 120 palavras e o limite máximo de 30 linhas, aplicando preferencialmente a estrutura equilibrada 5–9-9–5 (Introdução: 5 linhas | D1: 9 linhas | D2: 9 linhas | Conclusão: 5 linhas, totalizando entre 26 e 30 linhas) e empregando articuladores no início dos parágrafos e após cada ponto final.";
+
+    // Acervo Curado Oficial (22 Provas CRS/PMMG + 10 Simulados CHO/Comuns + 3 Adaptados Outras PMs)
+    const DEFAULT_FALLBACK_RUBRICS = [
+      // --- BLOCO 1: 22 TEMAS OFICIAIS DE PROVAS ANTERIORES CRS / PMMG (CHO, CFO, CFS) ---
+      {
+        id: "oficial-cho-2025", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CHO 2025)",
+        titulo_tema: "A importância da construção de um legado positivo para a longevidade de uma instituição",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cho-2024", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CHO 2024)",
+        titulo_tema: "Bem-estar e qualidade de vida no trabalho: práticas importantes para o alcance dos objetivos organizacionais da PMMG",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cho-2023", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CHO 2023)",
+        titulo_tema: "A boa comunicação é fundamental para o sucesso de qualquer organização, de um indivíduo, de uma nação",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cho-2022", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CHO 2022)",
+        titulo_tema: "As atribuições de Tenente e a infoxicação: como gerir o tempo com vistas à qualidade de vida e à produtividade",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cho-2020", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CHO 2020)",
+        titulo_tema: "A importância da contribuição e da ação do policial, responsável pelo policiamento nos moldes da filosofia de Polícia Comunitária, no fortalecimento da sensação de segurança",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cho-2019", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CHO 2019)",
+        titulo_tema: "Violência contra a mulher: necessidade de intervenção de atores sociais importantes na prevenção, controle e combate desse fenômeno",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cfo-2026", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CFO 2026)",
+        titulo_tema: "Como o agir, nas mais variadas esferas, pode salvar vítimas da violência doméstica e familiar",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cfo-2025", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CFO 2025)",
+        titulo_tema: "A influência do chefe, para ser profunda, exige que o exemplo seja total",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cfo-2023", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CFO 2023)",
+        titulo_tema: "Aplicações da inteligência artificial em prol da segurança pública: desafios e perspectivas",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cfo-2022", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CFO 2022)",
+        titulo_tema: "Os efeitos da comunicação oral e escrita na vida das pessoas",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cfo-2020", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CFO 2020)",
+        titulo_tema: "Atitude: competência durável que transforma o administrador em um agente de mudança nas empresas e nas instituições",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cfo-2019", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CFO 2019)",
+        titulo_tema: "Liderança: capacidade de traduzir a visão em realidade",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cfo-2018", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CFO 2018)",
+        titulo_tema: "Eduquem as crianças e não será necessário castigar os homens",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cfs-2026", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CFS 2026)",
+        titulo_tema: "Postura e compostura dos profissionais de segurança pública: atitudes fundamentais que proporcionam a sensação de segurança subjetiva nas pessoas",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cfs-2024", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CFS 2024)",
+        titulo_tema: "Como a adaptabilidade e a automação podem aumentar a efetividade dos serviços realizados pela PMMG?",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cfs-2023", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CFS 2023)",
+        titulo_tema: "O papel mediador da linguagem e seu uso adequado pelo primeiro interventor face a ocorrências de incidentes críticos de segurança pública",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cfs-2022", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CFS 2022)",
+        titulo_tema: "Abordagem policial, legalidade e cidadania",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cfs-2021", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CFS 2021)",
+        titulo_tema: "Como a ciência pode aprimorar a atividade policial militar?",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cfs-2020", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CFS 2020)",
+        titulo_tema: "A relação Polícia Militar e sociedade",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cfs-2019", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CFS 2019)",
+        titulo_tema: "O culto aos valores, deveres e ética militares para o alcance dos objetivos institucionais",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cfs-2018", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CFS 2018)",
+        titulo_tema: "Atitude: comportamento essencial para estabelecer a parceria entre a polícia e a população",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "oficial-cfs-2017", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CFS 2017)",
+        titulo_tema: "A utilização das mídias sociais pela Polícia Militar de Minas Gerais para promover segurança pública",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+
+      // --- BLOCO 2: 10 TEMAS SIMULADOS DE ALTA RELEVÂNCIA (CHO & COMUNS AOS CERTAMES) ---
+      {
+        id: "simulado-cho-01", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "Radar Preditivo CRS / PMMG (Foco CHO)",
+        titulo_tema: "A Polícia Comunitária como filosofia e estratégia organizacional no comandamento do setor sob responsabilidade do Tenente PM",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "simulado-cho-02", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "Radar Preditivo CRS / PMMG (Foco CHO)",
+        titulo_tema: "O Oficial da PMMG como fomentador da potencialização da capacidade de primeira resposta",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "simulado-cho-03", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "Radar Preditivo CRS / PMMG (Foco CHO)",
+        titulo_tema: "Estratégias e ferramentas na busca de se aumentar a eficiência no emprego do recurso público",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "simulado-cho-04", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "Radar Preditivo CRS / PMMG (Foco CHO)",
+        titulo_tema: "O fortalecimento do serviço de inteligência policial como subsídio para redução criminal",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "simulado-cho-05", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "Radar Preditivo CRS / PMMG (Foco CHO)",
+        titulo_tema: "O cuidado com a saúde mental do policial militar como prioridade absoluta para manutenção de resultados duradouros",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "simulado-comum-01", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "Radar Preditivo CRS / PMMG (Comum aos Certames)",
+        titulo_tema: "250 anos da PMMG: a sustentabilidade e longevidade institucional como pressupostos para garantias e direitos de todo policial militar e segurança de toda uma sociedade",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "simulado-comum-02", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "Radar Preditivo CRS / PMMG (Comum aos Certames)",
+        titulo_tema: "Câmeras corporais e o objetivo de reduzir a violência policial e melhorar a legitimidade e a confiança nas pessoas",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "simulado-comum-03", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "Radar Preditivo CRS / PMMG (Comum aos Certames)",
+        titulo_tema: "A importância e necessidade de fundada suspeita em abordagens, busca pessoal, veicular e domiciliar",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "simulado-comum-04", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "Radar Preditivo CRS / PMMG (Comum aos Certames)",
+        titulo_tema: "A PMMG e o aprimoramento do atendimento à minoria e aos grupos vulneráveis",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "simulado-comum-05", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "Radar Preditivo CRS / PMMG (Comum aos Certames)",
+        titulo_tema: "A integração da Defesa Civil e órgãos de segurança pública para prevenção e atuação corretiva em casos de desastres",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+
+      // --- BLOCO 3: TEMAS DE OUTRAS PMs ADAPTADOS AO PADRÃO CRS / PMMG ---
+      {
+        id: "adaptado-pms-1", sheet_id: "TODOS", categoria: "ADAPTADO_PMS",
+        banca: "Cobrado na PMESP / PMDF (Adaptado p/ CRS-PMMG)",
+        titulo_tema: "Polícia Comunitária e Prevenção Primária: A Aproximação entre a PMMG e a Sociedade",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "adaptado-pms-2", sheet_id: "TODOS", categoria: "ADAPTADO_PMS",
+        banca: "Cobrado na PMGO / PMPA (Adaptado p/ CRS-PMMG)",
+        titulo_tema: "Uso Diferenciado da Força, Transparência e Legitimidade da Atuação Policial Militar",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "adaptado-ppmg", sheet_id: "TODOS", categoria: "ADAPTADO_PMS",
+        banca: "Polícia Penal / Selecon / FGV (Adaptado)",
+        titulo_tema: "O Sistema Prisional Brasileiro entre a Punição e a Ressocialização",
+        textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      }
+    ];
+
+    // ========================================================================
+    // MÓDULO 2: UTILITÁRIOS VISUAIS, TOASTS E SANITIZAÇÃO
+    // ========================================================================
+    function escapeHTML(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function showToast(message, type = 'info', duration = 3800) {
+      let container = document.getElementById('chicoToastContainer');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'chicoToastContainer';
+        document.body.appendChild(container);
+      }
+      const toast = document.createElement('div');
+      toast.className = `chico-toast chico-toast-${type}`;
+      const icons = { info: 'fa-info-circle', success: 'fa-check-circle', warning: 'fa-exclamation-triangle', error: 'fa-times-circle' };
+      toast.innerHTML = `<i class="fas ${icons[type] || 'fa-info-circle'}"></i><span>${escapeHTML(message)}</span>`;
+      container.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.add('visible'));
+      setTimeout(() => {
+        toast.classList.remove('visible');
+        setTimeout(() => toast.remove(), 350);
+      }, duration);
+    }
+
+    function showLoadingIndicator(msg = "Processando...") {
+      document.getElementById('loadingText').textContent = msg;
+      document.getElementById('loadingIndicator').style.display = 'block';
+    }
+
+    function hideLoadingIndicator() {
+      document.getElementById('loadingIndicator').style.display = 'none';
+    }
+
+    function showTooltipOnHover(el) {
+      clearTimeout(el.tooltipTimer);
+      el.classList.add("show-tooltip");
+      el.tooltipTimer = setTimeout(() => el.classList.remove("show-tooltip"), 1200);
+    }
+
+    function hideTooltipOnLeave(el) {
+      clearTimeout(el.tooltipTimer);
+      el.classList.remove("show-tooltip");
+    }
+
+    function openLightbox(src) {
+      if (!src) return;
+      document.getElementById('lightboxImage').src = src;
+      document.getElementById('lightboxModal').style.display = 'flex';
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightboxModal').style.display = 'none';
+    }
+
+    // ========================================================================
+    // MÓDULO 3: AUTENTICAÇÃO E SESSÃO ÚNICA (PADRONIZADO COM FC-HTML)
+    // ========================================================================
+    function humanizeErrorMessage(error) {
+      if (!error) return "Ocorreu uma instabilidade momentânea. Tente novamente.";
+      const raw = (typeof error === 'string' ? error : (error.message || error.toString() || '')).toLowerCase();
+
+      console.error("[ChicoConcursos - Log Técnico]:", error);
+
+      if (raw.includes('aborterror') || raw.includes('timeout') || raw.includes('tempo limite')) {
+        return "A conexão demorou além do esperado. Verifique sua internet e tente novamente.";
+      }
+      if (raw.includes('failed to fetch') || raw.includes('networkerror') || raw.includes('erro de conexão') || raw.includes('offline')) {
+        return "Não foi possível conectar ao servidor. Verifique sua conexão com a internet.";
+      }
+      if (raw.includes('acesso negado') || raw.includes('permissão') || raw.includes('permissao')) {
+        return "Sua conta ainda não possui acesso a este curso. Se você já adquiriu, confirme com o suporte.";
+      }
+      if (raw.includes('too many') || raw.includes('muitas tentativas') || raw.includes('aguarde') || raw.includes('quota') || raw.includes('cota') || raw.includes('bloqueio')) {
+        return "Servidor sincronizando acessos recentes. Aguarde alguns instantes e tente novamente.";
+      }
+      if (raw.includes('servidor ocupado') || raw.includes('lock')) {
+        return "O servidor está sincronizando dados. Aguarde alguns segundos.";
+      }
+      if (raw.includes('senha incorreta') || raw.includes('credenciais inválidas') || raw.includes('credenciais invalidas') || raw.includes('método get') || raw.includes('metodo get') || raw.includes('use post')) {
+        return "E-mail ou senha incorretos. Verifique seus dados de acesso.";
+      }
+      if (raw.includes('email não encontrado') || raw.includes('email nao encontrado')) {
+        return "Este e-mail não foi encontrado em nosso cadastro.";
+      }
+      if (raw.includes('conta desativada')) {
+        return "Sua conta está inativa. Entre em contato com o suporte.";
+      }
+
+      const technicalTerms = ['exception', 'error', 'http', 'token', 'undefined', 'post', 'get', 'script', 'null', 'syntax', 'stack', 'método', 'metodo'];
+      const hasTechnicalTerm = technicalTerms.some(term => raw.includes(term));
+
+      if (!hasTechnicalTerm && raw.length < 100) {
+        return typeof error === 'string' ? error : error.message;
+      }
+
+      return "E-mail ou senha incorretos. Verifique seus dados de acesso.";
+    }
+
+    function showLoginError(message) {
+      const errorElement = document.getElementById('loginError');
+      const cleanMsg = humanizeErrorMessage(message);
+      errorElement.innerHTML = `<i class="fas fa-exclamation-circle" style="margin-right: 6px;"></i> ${escapeHTML(cleanMsg)}`;
+      errorElement.style.display = 'block';
+    }
+
+    function saveLoginTime() {
+      localStorage.setItem('loginTime', Date.now().toString());
+    }
+
+    function isSessionExpired() {
+      const loginTime = localStorage.getItem('loginTime');
+      if (!loginTime) return true;
+      return (Date.now() - parseInt(loginTime)) > SESSION_DURATION;
+    }
+
+    function startSessionTimer() {
+      if (sessionTimer) clearInterval(sessionTimer);
+      sessionTimer = setInterval(() => {
+        if (isSessionExpired()) {
+          clearInterval(sessionTimer);
+          expireSession();
+        }
+      }, 60000);
+    }
+
+    function expireSession() {
+      localStorage.removeItem('isAuthenticated');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('sessionToken');
+      localStorage.removeItem('loginTime');
+      isAuthenticated = false;
+      userEmail = '';
+      document.getElementById('sessionExpiredModal').style.display = 'flex';
+    }
+
+    function setLoginButtonLoading(isLoading) {
+      const button = document.getElementById('loginSubmitBtn');
+      const spinner = document.getElementById('loginSpinner');
+      const text = document.getElementById('loginBtnText');
+      if (isLoading) {
+        button.disabled = true;
+        text.style.visibility = 'hidden';
+        if (spinner) spinner.style.display = 'block';
+      } else {
+        button.disabled = false;
+        text.style.visibility = 'visible';
+        if (spinner) spinner.style.display = 'none';
+      }
+    }
+
+    function resetUIForLogout() {
+      document.getElementById('loginEmail').value = '';
+      document.getElementById('loginPassword').value = '';
+      setLoginButtonLoading(false);
+      document.getElementById('loginError').style.display = 'none';
+      document.getElementById('sessionExpiredModal').style.display = 'none';
+      document.getElementById('concurrentSessionModal').style.display = 'none';
+      document.getElementById('loginModal').style.display = 'flex';
+
+      const userMenu = document.getElementById('userDropdownMenu');
+      if (userMenu) userMenu.classList.remove('active');
+      document.getElementById('headerUserEmail').textContent = 'Carregando...';
+      resetForNewEssay();
+    }
+
+    async function login(event) {
+      if (event) event.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      if (!email || !password) {
+        showLoginError('Por favor, preencha todos os campos.');
+        return;
+      }
+
+      setLoginButtonLoading(true);
+      document.getElementById('loginError').style.display = 'none';
+
+      try {
+        const formData = new URLSearchParams();
+        formData.append('email', email);
+        formData.append('password', password);
+        formData.append('originUrl', window.location.href);
+        if (isForceRefreshLogin) formData.append('forceRefresh', 'true');
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s (Idêntico ao FC-html)
+
+        const response = await fetch(WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: formData,
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new Error(`Erro HTTP: ${response.status}`);
+        }
+
+        const result = await response.json();
+        isForceRefreshLogin = false;
+
+        if (result.success) {
+          userAllowedCourses = result.allowedCourses || [];
+          if (SHEET_ID && userAllowedCourses.length > 0 && !userAllowedCourses.includes(SHEET_ID)) {
+            showLoginError('⚠️ Acesso Negado: Sua conta não possui permissão para acessar este curso.');
+            setLoginButtonLoading(false);
+            return;
+          }
+
+          userEmail = email;
+          isAuthenticated = true;
+          localStorage.setItem('isAuthenticated', 'true');
+          localStorage.setItem('userEmail', userEmail);
+          localStorage.setItem('sessionToken', result.sessionToken);
+          localStorage.setItem('userAllowedCourses', JSON.stringify(userAllowedCourses));
+          saveLoginTime();
+
+          document.getElementById('headerUserEmail').textContent = userEmail;
+          document.getElementById('loginModal').style.display = 'none';
+          setLoginButtonLoading(false);
+          checkAndIncrementStreak();
+          startSessionTimer();
+          startSessionHeartbeat();
+          await loadRubricsFromSupabase();
+        } else {
+          showLoginError(result.error || 'Erro durante a autenticação.');
+          setLoginButtonLoading(false);
+        }
+      } catch (error) {
+        console.error('Erro no login:', error);
+        isForceRefreshLogin = false;
+        if (error.name === 'AbortError') {
+          showLoginError('Tempo limite excedido. Verifique sua conexão e tente novamente.');
+        } else {
+          showLoginError('Erro ao conectar com o servidor. Tente novamente.');
+        }
+        setLoginButtonLoading(false);
+      }
+    }
+
+    function checkAuthentication() {
+      const savedAuth = localStorage.getItem('isAuthenticated');
+      const savedEmail = localStorage.getItem('userEmail');
+      const savedToken = localStorage.getItem('sessionToken');
+
+      if (savedAuth === 'true' && savedEmail && savedToken && savedToken.includes('.')) {
+        if (isSessionExpired()) {
+          expireSession();
+          return;
+        }
+
+        userAllowedCourses = JSON.parse(localStorage.getItem('userAllowedCourses') || '[]');
+        if (SHEET_ID && userAllowedCourses.length > 0 && !userAllowedCourses.includes(SHEET_ID)) {
+          isForceRefreshLogin = true;
+          localStorage.removeItem('isAuthenticated');
+          localStorage.removeItem('sessionToken');
+          localStorage.removeItem('userAllowedCourses');
+          isAuthenticated = false;
+          document.getElementById('loginEmail').value = savedEmail;
+          document.getElementById('loginModal').style.display = 'flex';
+          showLoginError('Novo material detectado: Confirme sua senha para liberar o acesso.');
+          return;
+        }
+
+        isAuthenticated = true;
+        userEmail = savedEmail;
+        document.getElementById('headerUserEmail').textContent = userEmail;
+        document.getElementById('loginModal').style.display = 'none';
+        checkAndIncrementStreak();
+        startSessionTimer();
+        startSessionHeartbeat();
+        loadRubricsFromSupabase();
+      } else {
+        localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem('sessionToken');
+        document.getElementById('loginModal').style.display = 'flex';
+      }
+    }
+
+    function startSessionHeartbeat() {
+      if (sessionHeartbeat) clearInterval(sessionHeartbeat);
+      failedHeartbeatCount = 0;
+      sessionHeartbeat = setInterval(async () => {
+        const token = localStorage.getItem('sessionToken');
+        const email = localStorage.getItem('userEmail');
+        if (!token || !email) return;
+        try {
+          const formData = new URLSearchParams();
+          formData.append('action', 'checkStatus');
+          formData.append('email', email);
+          formData.append('sessionToken', token);
+          formData.append('originUrl', window.location.href);
+          const res = await fetch(WEB_APP_URL, { method: 'POST', body: formData });
+          const result = await res.json();
+          if (!result.success) {
+            if (result.error === 'concurrent_login') {
+              failedHeartbeatCount++;
+              if (failedHeartbeatCount >= 3) {
+                clearInterval(sessionHeartbeat);
+                localStorage.removeItem('isAuthenticated');
+                localStorage.removeItem('sessionToken');
+                document.getElementById('concurrentSessionModal').style.display = 'flex';
+              }
+            }
+          } else {
+            failedHeartbeatCount = 0;
+          }
+        } catch (e) {}
+      }, 300000);
+    }
+
+    function logout() {
+      // 1. AVISA O SERVIDOR (Libera a sessão na nuvem para evitar bloqueio de tentativas)
+      const token = localStorage.getItem('sessionToken');
+      const email = localStorage.getItem('userEmail');
+
+      if (token && email) {
+        const formData = new URLSearchParams();
+        formData.append('action', 'logout');
+        formData.append('email', email);
+        formData.append('sessionToken', token);
+
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(WEB_APP_URL, formData);
+        } else {
+          fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: formData
+          }).catch(e => console.log("Erro ao avisar servidor:", e));
+        }
+      }
+
+      // 2. LIMPA TIMERS E MEMÓRIA LOCAL
+      if (sessionTimer) {
+        clearInterval(sessionTimer);
+        sessionTimer = null;
+      }
+      if (sessionHeartbeat) {
+        clearInterval(sessionHeartbeat);
+        sessionHeartbeat = null;
+      }
+
+      localStorage.removeItem('isAuthenticated');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('sessionToken');
+      localStorage.removeItem('loginTime');
+
+      isAuthenticated = false;
+      userEmail = '';
+
+      // 3. RESETA A TELA INSTANTANEAMENTE (Sem recarregar o iframe)
+      resetUIForLogout();
+    }
+
+    function toggleUserMenu(e) {
+      if (e) e.stopPropagation();
+      document.getElementById('userDropdownMenu').classList.toggle('active');
+    }
+
+    // ========================================================================
+    // MÓDULO 4: CENTRAL DE TEMAS, FILTRO DE CATEGORIAS E RADAR PREDITIVO IA
+    // ========================================================================
+    function detectRubricCategory(item) {
+      if (item.categoria) return item.categoria;
+      const b = (item.banca || '').toUpperCase();
+      if (b.includes('ADAPTADO') || b.includes('SELECON') || b.includes('PMESP') || b.includes('PMDF') || b.includes('PMGO')) {
+        return 'ADAPTADO_PMS';
+      }
+      if (b.includes('PREDITIVO') || b.includes('INÉDITO')) {
+        return 'PREDITIVO_CRS';
+      }
+      return 'OFICIAL_PMMG';
+    }
+
+    function getCategoryLabel(cat) {
+      if (cat === 'OFICIAL_PMMG') return '🏆 TEMA OFICIAL CRS / PMMG';
+      if (cat === 'ADAPTADO_PMS') return '🛡️ TEMA DE OUTRAS PMs ADAPTADO P/ PMMG';
+      if (cat === 'PREDITIVO_CRS') return '🎯 RADAR PREDITIVO INÉDITO (CRS / PMMG)';
+      return '📚 ACERVO CHICO CONCURSOS';
+    }
+
+    async function loadRubricsFromSupabase() {
+      let supaList = [];
+      try {
+        if (supabaseClient) {
+          let query = supabaseClient
+            .from('redacao_temas')
+            .select('*')
+            .eq('ativo', true)
+            .order('created_at', { ascending: false });
+
+          const { data, error } = await query;
+          if (!error && data && data.length > 0) {
+            supaList = data
+              .filter(r => !r.sheet_id || r.sheet_id === 'TODOS' || r.sheet_id === SHEET_ID)
+              .map(r => ({ ...r, categoria: detectRubricCategory(r) }));
+          }
+        }
+      } catch (e) {
+        console.warn("Usando bancas padrão locais:", e);
+      }
+
+      // Mescla os temas do Supabase com o acervo curado sem duplicar títulos
+      const existingTitles = new Set(supaList.map(i => (i.titulo_tema || '').toLowerCase().trim()));
+      const merged = [...supaList];
+      DEFAULT_FALLBACK_RUBRICS.forEach(item => {
+        if (!existingTitles.has(item.titulo_tema.toLowerCase().trim())) {
+          merged.push(item);
+        }
+      });
+
+      allLoadedRubrics = merged;
+      filterRubricsByCategory();
+    }
+
+    function filterRubricsByCategory() {
+      const catFilter = document.getElementById('categoryFilterSelect')?.value || 'TODAS';
+      const select = document.getElementById('bancaSelect');
+
+      if (catFilter === 'TODAS') {
+        availableRubrics = [...allLoadedRubrics];
+      } else {
+        availableRubrics = allLoadedRubrics.filter(item => detectRubricCategory(item) === catFilter);
+      }
+
+      if (availableRubrics.length === 0) {
+        availableRubrics = [...allLoadedRubrics];
+      }
+
+      select.innerHTML = '';
+      availableRubrics.forEach((item, idx) => {
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.textContent = `${item.banca} — ${item.titulo_tema}`;
+        select.appendChild(opt);
+      });
+
+      handleBancaChange();
+    }
+
+    function handleBancaChange() {
+      const idx = parseInt(document.getElementById('bancaSelect').value, 10) || 0;
+      selectedRubric = availableRubrics[idx] || availableRubrics[0];
+      if (!selectedRubric) return;
+
+      const cat = detectRubricCategory(selectedRubric);
+      const badgeEl = document.getElementById('themeCategoryBadge');
+      if (badgeEl) {
+        badgeEl.textContent = getCategoryLabel(cat);
+      }
+
+      document.getElementById('themeTitleDisplay').textContent = `Tema: ${selectedRubric.titulo_tema}`;
+      document.getElementById('themeMotivatorDisplay').textContent = selectedRubric.textos_motivadores || INSTRUCAO_PADRAO_CRS;
+      document.getElementById('rubricCriteriaDisplay').textContent = `ESPELHO DE CORREÇÃO (${selectedRubric.banca}):\n${selectedRubric.criterios_banca}`;
+      document.getElementById('limitsInfoBox').textContent = `Título Obrigatório | Mín: 120 palavras (26–30 linhas rec.) | Máx: ${selectedRubric.max_linhas} linhas | ${selectedRubric.nota_maxima} pts`;
+    }
+
+    function toggleRubricDetails() {
+      const el = document.getElementById('rubricCriteriaDisplay');
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function togglePredictiveGenerator() {
+      const box = document.getElementById('predictiveGeneratorBox');
+      if (!box) return;
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    }
+
+    async function generatePredictiveThemeWithAI() {
+      const mode = document.getElementById('aiThemeModeSelect')?.value || 'preditivo_inedito';
+      const axis = document.getElementById('aiThemeAxisSelect')?.value || 'Segurança Pública e Ordem Social';
+      const btn = document.getElementById('btnGenerateThemeAI');
+
+      if (btn) btn.disabled = true;
+      showLoadingIndicator("Elaborando proposta de redação no padrão CRS / PMMG...");
+
+      try {
+        const response = await fetch(ESSAY_AI_BACKEND_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'apikey': SUPABASE_ANON_KEY
+          },
+          body: JSON.stringify({
+            action: 'generate_theme',
+            mode: mode,
+            axis: axis
+          })
+        });
+
+        const result = await response.json();
+        if (!result.success) throw new Error(result.error || "Não foi possível gerar o tema agora.");
+
+        const generated = result.data;
+        const newRubric = {
+          id: 'ai-' + Date.now(),
+          sheet_id: SHEET_ID || 'TODOS',
+          categoria: mode === 'adaptado_outras_pms' ? 'ADAPTADO_PMS' : 'PREDITIVO_CRS',
+          banca: generated.banca || (mode === 'adaptado_outras_pms' ? 'Outras PMs (Adaptado p/ CRS-PMMG)' : 'Radar Preditivo CRS / PMMG'),
+          titulo_tema: generated.titulo_tema || 'Segurança Pública e Garantias Constitucionais em Minas Gerais',
+          textos_motivadores: generated.textos_motivadores || '',
+          min_linhas: Number(generated.min_linhas) || 20,
+          max_linhas: Number(generated.max_linhas) || 30,
+          nota_maxima: Number(generated.nota_maxima) || 100,
+          criterios_banca: generated.criterios_banca || PADRAO_CRITERIOS_CRS
+        };
+
+        allLoadedRubrics.unshift(newRubric);
+        document.getElementById('categoryFilterSelect').value = 'TODAS';
+        filterRubricsByCategory();
+        document.getElementById('bancaSelect').value = '0';
+        handleBancaChange();
+        document.getElementById('predictiveGeneratorBox').style.display = 'none';
+
+        showToast(`Novo tema gerado via ${result.provider}!`, "success");
+      } catch (e) {
+        console.error("Erro ao gerar tema:", e);
+        showToast(e.message || "Erro ao gerar tema com IA.", "error");
+      } finally {
+        if (btn) btn.disabled = false;
+        hideLoadingIndicator();
+      }
+    }
+
+    // ========================================================================
+    // MÓDULO 5: COMPRESSÃO INTELIGENTE DA FOTO NO NAVEGADOR (<CANVAS>)
+    // ========================================================================
+    function handlePhotoSelected(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      showLoadingIndicator("Otimizando nitidez da imagem...");
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = new Image();
+        img.onload = function () {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 1600;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Converte para JPEG leve e nítido (~220 KB)
+          compressedImageBase64 = canvas.toDataURL('image/jpeg', 0.84);
+
+          document.getElementById('step1Thumb').src = compressedImageBase64;
+          document.getElementById('step2Photo').src = compressedImageBase64;
+          document.getElementById('step1PreviewArea').style.display = 'block';
+          hideLoadingIndicator();
+          showToast("Foto carregada com sucesso! Clique em 'Ler Manuscrito com IA'.", "success");
+        };
+        img.onerror = function () {
+          hideLoadingIndicator();
+          showToast("Formato de imagem não suportado pelo navegador. Tire uma foto em JPG ou PNG.", "error");
+        };
+        img.src = e.target.result;
+      };
+      reader.onerror = function () {
+        hideLoadingIndicator();
+        showToast("Erro ao ler o arquivo selecionado. Tente novamente.", "error");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ========================================================================
+    // MÓDULO 6: ETAPA 1 (OCR DIPLOMÁTICO) E ETAPA 2 (CORREÇÃO PELA BANCA)
+    // ========================================================================
+    function goToStep(stepNumber) {
+      document.getElementById('step1Container').style.display = stepNumber === 1 ? 'block' : 'none';
+      document.getElementById('step2Container').style.display = stepNumber === 2 ? 'block' : 'none';
+      document.getElementById('step3Container').style.display = stepNumber === 3 ? 'block' : 'none';
+
+      const b1 = document.getElementById('stepBadge1');
+      const b2 = document.getElementById('stepBadge2');
+      const b3 = document.getElementById('stepBadge3');
+
+      b1.className = 'step-badge ' + (stepNumber === 1 ? 'active' : 'done');
+      b2.className = 'step-badge ' + (stepNumber === 2 ? 'active' : (stepNumber > 2 ? 'done' : ''));
+      b3.className = 'step-badge ' + (stepNumber === 3 ? 'active' : '');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function runStep1OCR() {
+      if (!compressedImageBase64) {
+        showToast("Selecione ou tire uma foto da redação primeiro.", "warning");
+        return;
+      }
+
+      showLoadingIndicator("Lendo sua caligrafia linha por linha (Etapa 1/2)...");
+      try {
+        const response = await fetch(ESSAY_AI_BACKEND_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'apikey': SUPABASE_ANON_KEY
+          },
+          body: JSON.stringify({
+            action: 'ocr',
+            imageBase64: compressedImageBase64
+          })
+        });
+
+        const result = await response.json();
+        if (!result.success) throw new Error(result.error || "Falha ao transcrever imagem.");
+
+        const ocrData = result.data;
+        document.getElementById('transcribedTextarea').value = ocrData.transcricao || "";
+        document.getElementById('confirmedLineCount').value = ocrData.linhas_detectadas || 28;
+        document.getElementById('ocrProviderBadge').textContent = `Lido via ${result.provider} • Legibilidade: ${ocrData.legibilidade || 'Boa'}`;
+        document.getElementById('visualObservationNote').textContent = ocrData.observacao_visual
+          ? `👁️ Análise Visual da Folha: ${ocrData.observacao_visual}`
+          : '';
+
+        updateLiveTextMetrics();
+        goToStep(2);
+        showToast("Transcrição concluída! Confira o texto antes de corrigir.", "success");
+      } catch (e) {
+        console.error("Erro no OCR:", e);
+        showToast(e.message || "Erro ao ler a imagem. Tente novamente.", "error");
+      } finally {
+        hideLoadingIndicator();
+      }
+    }
+
+    function updateLiveTextMetrics() {
+      const raw = document.getElementById('transcribedTextarea')?.value || '';
+      const cleanWords = raw
+        .replace(/\[T[ÍI]TULO\]/gi, '')
+        .replace(/\[L\d+\]/gi, '')
+        .replace(/\[rasura[^\]]*\]/gi, '')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+      const wordCount = cleanWords.length;
+
+      const lineTags = raw.match(/\[L\d+\]/gi);
+      if (lineTags && lineTags.length > 0) {
+        document.getElementById('confirmedLineCount').value = lineTags.length;
+      }
+
+      const hasTitle = /\[T[ÍI]TULO\]/i.test(raw);
+      const wBadge = document.getElementById('liveWordCountBadge');
+      const tBadge = document.getElementById('liveTitleStatusBadge');
+      const sBadge = document.getElementById('liveStructureHintBadge');
+
+      if (wBadge) {
+        wBadge.textContent = wordCount >= 120
+          ? `✅ Palavras: ${wordCount} (Mín. 120 atingido)`
+          : `⚠️ Palavras: ${wordCount} (Faltam ${120 - wordCount} p/ mín. de 120 — perde ${120 - wordCount} pts)`;
+        wBadge.style.color = wordCount >= 120 ? '#2ecc71' : '#ff7675';
+      }
+      if (tBadge) {
+        tBadge.textContent = hasTitle ? '✅ [TÍTULO] identificado' : '⚠️ Dica: Inicie a 1ª linha com [TÍTULO] Seu Título (-1 pt sem título)';
+        tBadge.style.color = hasTitle ? '#2ecc71' : '#f39c12';
+      }
+      if (sBadge) {
+        const lines = parseInt(document.getElementById('confirmedLineCount')?.value, 10) || 0;
+        sBadge.textContent = (lines >= 26 && lines <= 30)
+          ? `✅ Extensão: ${lines} linhas (Padrão 26–30 CRS)`
+          : (lines > 30 ? `❌ ${lines} linhas (-5 pts por linha acima de 30)` : `📐 Linhas: ${lines} (Ideal CRS: 26 a 30 linhas)`);
+        sBadge.style.color = (lines >= 26 && lines <= 30) ? '#2ecc71' : (lines > 30 ? '#ff7675' : '#FFD700');
+      }
+    }
+
+    function getEssayConsistencyKey(banca, tema, lineCount, text) {
+      const normalized = `${banca || ''}|${tema || ''}|${lineCount || 0}|${String(text || '').replace(/\s+/g, ' ').trim().toLowerCase()}`;
+      let hash = 5381;
+      for (let i = 0; i < normalized.length; i++) {
+        hash = ((hash << 5) + hash) + normalized.charCodeAt(i);
+        hash = hash & hash;
+      }
+      return 'essay_hash_' + Math.abs(hash);
+    }
+
+    function regradeFromScratch() {
+      runStep2Grading(true);
+    }
+
+    async function runStep2Grading(forceFresh = false) {
+      const confirmedText = document.getElementById('transcribedTextarea').value.trim();
+      const lineCount = parseInt(document.getElementById('confirmedLineCount').value, 10) || 25;
+
+      if (confirmedText.length < 30) {
+        showToast("O texto transcrito está muito curto para correção.", "warning");
+        return;
+      }
+
+      const cacheKey = getEssayConsistencyKey(
+        selectedRubric?.banca,
+        selectedRubric?.titulo_tema,
+        lineCount,
+        confirmedText
+      );
+
+      // TRAVA 4: Se a mesma redação já foi corrigida para este tema e não for reavaliação forçada, mantém nota idêntica
+      if (!forceFresh) {
+        try {
+          const savedCache = JSON.parse(localStorage.getItem('chicoEssayGradeCache_v1') || '{}');
+          if (savedCache[cacheKey]) {
+            const cachedEntry = savedCache[cacheKey];
+            lastGradingResult = cachedEntry.data;
+            renderGradingReport(cachedEntry.data, `${cachedEntry.provider} • Nota Consolidada`);
+            goToStep(3);
+            showToast("Avaliação consolidada recuperada (Variação 0,0 pts).", "info");
+            return;
+          }
+        } catch (err) {
+          console.warn("Aviso ao ler memória de consistência:", err);
+        }
+      }
+
+      showLoadingIndicator(`Aplicando espelho da banca ${selectedRubric.banca} (Etapa 2/2)...`);
+      try {
+        const response = await fetch(ESSAY_AI_BACKEND_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'apikey': SUPABASE_ANON_KEY
+          },
+          body: JSON.stringify({
+            action: 'grade',
+            imageBase64: compressedImageBase64,
+            transcribedText: confirmedText,
+            lineCount: lineCount,
+            rubric: selectedRubric
+          })
+        });
+
+        const result = await response.json();
+        if (!result.success) throw new Error(result.error || "Erro ao corrigir redação.");
+
+        lastGradingResult = result.data;
+
+        // Guarda na Memória de Consistência (mantém até às últimas 30 redações no navegador)
+        try {
+          const savedCache = JSON.parse(localStorage.getItem('chicoEssayGradeCache_v1') || '{}');
+          const keys = Object.keys(savedCache);
+          if (keys.length >= 30) delete savedCache[keys[0]];
+          savedCache[cacheKey] = {
+            data: result.data,
+            provider: result.provider,
+            timestamp: Date.now()
+          };
+          localStorage.setItem('chicoEssayGradeCache_v1', JSON.stringify(savedCache));
+        } catch (err) {
+          console.warn("Aviso ao guardar memória de consistência:", err);
+        }
+
+        renderGradingReport(result.data, result.provider);
+
+        // Salva no Histórico do Supabase em segundo plano
+        if (supabaseClient && userEmail) {
+          supabaseClient.from('redacao_historico').insert([{
+            user_email: userEmail,
+            sheet_id: SHEET_ID || 'GERAL',
+            banca: selectedRubric.banca,
+            tema: selectedRubric.titulo_tema,
+            transcricao: confirmedText,
+            nota_total: result.data.nota_final,
+            nota_maxima: result.data.nota_maxima || selectedRubric.nota_maxima,
+            relatorio_json: result.data,
+            motor_ia: result.provider
+          }]).then(() => console.log("Redação salva no histórico!"));
+        }
+
+        goToStep(3);
+      } catch (e) {
+        console.error("Erro na correção:", e);
+        showToast(e.message || "Erro ao avaliar redação.", "error");
+      } finally {
+        hideLoadingIndicator();
+      }
+    }
+
+    function renderGradingReport(data, providerName) {
+      const notaFinal = Number(data.nota_final) || 0;
+      const notaMax = Number(data.nota_maxima) || Number(selectedRubric.nota_maxima) || 100;
+
+      document.getElementById('gradeProviderBadge').textContent = `Corrigido por ${providerName}`;
+      document.getElementById('resultBancaTitle').textContent = `${selectedRubric.banca} — ${selectedRubric.titulo_tema}`;
+      document.getElementById('resultSummaryText').textContent = data.resumo_avaliacao || data.parecer_professor_chico || "";
+      document.getElementById('finalScoreValue').textContent = notaFinal;
+      document.getElementById('finalScoreMax').textContent = `de ${notaMax} pontos`;
+
+      // Confetes se atingir >= 70% da nota máxima
+      if ((notaFinal / notaMax) >= 0.7 && typeof confetti === 'function') {
+        confetti({ particleCount: 70, spread: 80, origin: { y: 0.3 } });
+      }
+
+      // 1. Renderiza Critérios
+      const critContainer = document.getElementById('criteriaBreakdownList');
+      critContainer.innerHTML = '';
+      (data.criterios || []).forEach(c => {
+        const pct = c.nota_maxima > 0 ? Math.min(100, Math.round((c.nota_obtida / c.nota_maxima) * 100)) : 0;
+        const div = document.createElement('div');
+        div.className = 'criterion-card';
+        div.innerHTML = `
+          <div class="criterion-header">
+            <span>${escapeHTML(c.nome)}</span>
+            <span style="color:#FFD700;">${c.nota_obtida} / ${c.nota_maxima} pts</span>
+          </div>
+          <div class="criterion-bar-bg">
+            <div class="criterion-bar-fill" style="width:${pct}%;"></div>
+          </div>
+          <p style="font-size:0.9em; color:#ccc; line-height:1.45;">${escapeHTML(c.comentario)}</p>
+        `;
+        critContainer.appendChild(div);
+      });
+
+      // 2. Renderiza Desvios Linha a Linha (Com indicação exata da Linha)
+      const errContainer = document.getElementById('detailedErrorsList');
+      errContainer.innerHTML = '';
+      if (!data.desvios_detalhados || data.desvios_detalhados.length === 0) {
+        errContainer.innerHTML = '<p style="color:#2ecc71; font-weight:bold;">🎉 Nenhum desvio gramatical grave foi identificado!</p>';
+      } else {
+        data.desvios_detalhados.forEach(d => {
+          const div = document.createElement('div');
+          div.className = 'error-item-box';
+          const linhaLabel = d.linha ? `📍 ${escapeHTML(String(d.linha).replace(/^linha\s*/i, 'Linha '))}` : '📍 No texto';
+          div.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:6px;">
+              <span style="font-size:0.8em; font-weight:800; color:#0D0D09; background:#FFD700; padding:2px 9px; border-radius:6px;">
+                ${linhaLabel}
+              </span>
+              <span style="font-size:0.78em; color:#FFD700; background:#2a2a2a; padding:2px 10px; border-radius:10px; border:1px solid #444;">
+                ${escapeHTML(d.regra_violada || 'Norma Padrão')}
+              </span>
+            </div>
+            <div style="margin-bottom:6px;">
+              <span class="wrong-snippet">"${escapeHTML(d.trecho_original)}"</span>
+              <i class="fas fa-arrow-right" style="margin:0 8px; color:#888;"></i>
+              <span class="right-snippet">"${escapeHTML(d.correcao_sugerida)}"</span>
+            </div>
+            <div style="color:#ccc; font-size:0.88em;">${escapeHTML(d.explicacao)}</div>
+          `;
+          errContainer.appendChild(div);
+        });
+      }
+
+      // 3. Pontos Fortes e a Melhorar
+      const sList = document.getElementById('strengthsList');
+      sList.innerHTML = (data.pontos_fortes || []).map(p => `<li>${escapeHTML(p)}</li>`).join('');
+
+      const iList = document.getElementById('improvementsList');
+      iList.innerHTML = (data.pontos_melhorar || []).map(p => `<li>${escapeHTML(p)}</li>`).join('');
+
+      // 4. Redação Completa Reescrita (aceita redacao_reescrita ou paragrafo_modelo de históricos antigos)
+      document.getElementById('modelParagraphBox').textContent = data.redacao_reescrita || data.paragrafo_modelo || "Continue praticando a estrutura dissertativa.";
+    }
+
+    function resetForNewEssay() {
+      compressedImageBase64 = null;
+      document.getElementById('essayPhotoInput').value = '';
+      document.getElementById('step1PreviewArea').style.display = 'none';
+      document.getElementById('transcribedTextarea').value = '';
+      goToStep(1);
+    }
+
+    // ========================================================================
+    // MÓDULO 7: HISTÓRICO DE REDAÇÕES E LEITURA DE VOZ (TTS)
+    // ========================================================================
+    async function openHistoryModal() {
+      const modal = document.getElementById('historyModal');
+      const list = document.getElementById('historyListContainer');
+      modal.style.display = 'flex';
+      list.innerHTML = '<p style="text-align:center; color:#888;"><i class="fas fa-spinner fa-spin"></i> Buscando suas redações...</p>';
+
+      if (!supabaseClient || !userEmail) {
+        list.innerHTML = '<p style="text-align:center; color:#888;">Histórico indisponível.</p>';
+        return;
+      }
+
+      const { data, error } = await supabaseClient
+        .from('redacao_historico')
+        .select('*')
+        .eq('user_email', userEmail)
+        .order('created_at', { ascending: false })
+        .limit(15);
+
+      if (error || !data || data.length === 0) {
+        list.innerHTML = '<p style="text-align:center; color:#888;">Você ainda não possui redações corrigidas.</p>';
+        return;
+      }
+
+      list.innerHTML = '';
+      data.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'criterion-card';
+        div.style.cursor = 'pointer';
+        const dateStr = new Date(item.created_at).toLocaleDateString('pt-BR');
+        div.innerHTML = `
+          <div class="criterion-header">
+            <span>${escapeHTML(item.banca)} — ${escapeHTML(item.tema)}</span>
+            <span style="color:#FFD700;">${item.nota_total} / ${item.nota_maxima} pts</span>
+          </div>
+          <div style="font-size:0.82em; color:#888;">Corrigida em ${dateStr} via ${escapeHTML(item.motor_ia || 'IA')} (Clique para abrir)</div>
+        `;
+        div.onclick = () => {
+          modal.style.display = 'none';
+          lastGradingResult = item.relatorio_json;
+          renderGradingReport(item.relatorio_json, item.motor_ia || 'Histórico');
+          goToStep(3);
+        };
+        list.appendChild(div);
+      });
+    }
+
+    // Relógio e Ofensiva
+    function resetTimer() {
+      timerSeconds = 0;
+      document.getElementById('timer').textContent = "00:00";
+    }
+    setInterval(() => {
+      if (!isAuthenticated) return;
+      timerSeconds++;
+      const m = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+      const s = String(timerSeconds % 60).padStart(2, '0');
+      document.getElementById('timer').textContent = `${m}:${s}`;
+    }, 1000);
+
+    function checkAndIncrementStreak() {
+      const now = new Date();
+      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const lastDate = localStorage.getItem('chicoLastStudyDate');
+      let currentStreak = parseInt(localStorage.getItem('chicoStreakCount') || 1);
+      if (lastDate && lastDate !== today) {
+        const diffDays = Math.round((new Date(today + "T00:00:00") - new Date(lastDate + "T00:00:00")) / 86400000);
+        currentStreak = diffDays === 1 ? currentStreak + 1 : 1;
+      }
+      localStorage.setItem('chicoLastStudyDate', today);
+      localStorage.setItem('chicoStreakCount', currentStreak);
+      document.getElementById('streakDisplay').innerHTML = `🔥 ${currentStreak}`;
+    }
+
+    window.addEventListener('click', (e) => {
+      const userMenu = document.getElementById('userDropdownMenu');
+      const userWrapper = document.querySelector('.header-user-wrapper');
+      if (userMenu && userMenu.classList.contains('active') && userWrapper && !userWrapper.contains(e.target)) {
+        userMenu.classList.remove('active');
+      }
+    });
+
+    // Pausa o Heartbeat quando a aba fica oculta para economizar cota do Google Apps Script
+    document.addEventListener('visibilitychange', () => {
+      if (!isAuthenticated) return;
+      if (document.hidden) {
+        if (sessionHeartbeat) {
+          clearInterval(sessionHeartbeat);
+          sessionHeartbeat = null;
+        }
+      } else {
+        startSessionHeartbeat();
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', checkAuthentication);
+  </script>
+</body>
+
+</html>

@@ -998,14 +998,14 @@
             <i class="fas fa-compass"></i> Gerador de Propostas Preditivas (Padrão CRS / PMMG)
           </div>
           <p style="color:#ccc; font-size:0.85em; margin-bottom:12px; line-height:1.4;">
-            Crie um tema inédito com alta probabilidade de cobrança ou adapte questões discursivas já aplicadas em outras Polícias Militares do Brasil para a realidade da PMMG:
+            Crie um tema inédito, 100% no padrão CRS / PMMG, com alta probabilidade de cobrança na próxima prova (CHO, CFO ou CFS) ou com foco nas atribuições do Tenente PM:
           </p>
           <div class="form-grid" style="margin-bottom:10px;">
             <div>
-              <label class="field-label" for="aiThemeModeSelect">Modalidade da Proposta:</label>
+              <label class="field-label" for="aiThemeModeSelect">Modalidade da Proposta (Padrão CRS / PMMG):</label>
               <select id="aiThemeModeSelect" class="chico-select">
-                <option value="preditivo_inedito">🎯 Tema Preditivo Inédito (Foco CRS / PMMG)</option>
-                <option value="adaptado_outras_pms">🛡️ Tema Cobrado em Outra PM do Brasil (Adaptado p/ PMMG)</option>
+                <option value="foco_cho_gestao">🎯 Simulado Inédito — Foco CHO / Gestão PMMG</option>
+                <option value="preditivo_inedito">🛡️ Simulado Inédito — Geral CRS / PMMG (CHO, CFO, CFS)</option>
               </select>
             </div>
             <div>
@@ -1016,7 +1016,7 @@
                 <option value="Polícia Comunitária, Prevenção Criminal e Preservação da Ordem Pública">3. Polícia Comunitária e Ordem Pública</option>
                 <option value="Ética Militar, Hierarquia, Disciplina e Saúde Mental do Policial">4. Ética Militar e Saúde Mental do Policial</option>
                 <option value="Enfrentamento ao Crime Organizado, Integração Policial e Fronteiras">5. Combate ao Crime Organizado e Integração</option>
-                <option value="Sorteio Livre entre os temas mais atuais da Segurança Pública Brasileira">🎲 Sorteio Livre (Deixar a IA escolher)</option>
+                <option value="Sorteio Livre entre os temas mais atuais da Segurança Pública em Minas Gerais">🎲 Sorteio Livre (Deixar a IA escolher)</option>
               </select>
             </div>
           </div>
@@ -1032,12 +1032,11 @@
 
         <div class="form-grid">
           <div>
-            <label class="field-label" for="categoryFilterSelect">1º) Filtrar por Origem do Tema:</label>
+            <label class="field-label" for="categoryFilterSelect">1º) Filtrar por Modalidade CRS / PMMG:</label>
             <select id="categoryFilterSelect" class="chico-select" onchange="filterRubricsByCategory()">
-              <option value="TODAS">📚 Todas as Categorias de Temas</option>
-              <option value="OFICIAL_PMMG">🏆 Já Cobrados pela CRS / PMMG (Provas Anteriores)</option>
-              <option value="ADAPTADO_PMS">🛡️ Cobrados em Outras PMs (Adaptados à PMMG)</option>
-              <option value="PREDITIVO_CRS">🎯 Radar Preditivo (Temas Inéditos para Treino)</option>
+              <option value="TODAS">📚 Todos os Temas CRS / PMMG (Oficiais + Simulados)</option>
+              <option value="OFICIAL_PMMG">🏆 Provas Oficiais Anteriores CRS / PMMG (CHO, CFO, CFS)</option>
+              <option value="PREDITIVO_CRS">🎯 Temas Simulados & Preditivos (Padrão CRS / PMMG)</option>
             </select>
           </div>
           <div>
@@ -1335,9 +1334,17 @@
 
     const INSTRUCAO_PADRAO_CRS = "Redija um texto dissertativo-argumentativo em norma-padrão da língua portuguesa sobre o tema proposto. Dê um TÍTULO à sua redação (a linha do título não conta nas 30 linhas). Respeite o mínimo de 120 palavras e o limite máximo de 30 linhas, aplicando preferencialmente a estrutura equilibrada 5–9-9–5 (Introdução: 5 linhas | D1: 9 linhas | D2: 9 linhas | Conclusão: 5 linhas, totalizando entre 26 e 30 linhas) e empregando articuladores no início dos parágrafos e após cada ponto final.";
 
-    // Acervo Curado Oficial (22 Provas CRS/PMMG + 10 Simulados CHO/Comuns + 3 Adaptados Outras PMs)
+    const TEXTO_APOIO_CHO_2026 = "TEXTO DE APOIO OFICIAL (CHO/CSTGSP 2026): \"Golpes virtuais superam golpes físicos em Minas Gerais — Comandante Geral da Polícia Militar de Minas Gerais, Carlos Frederico Garcia, diz que o policial militar está sendo treinado para ser um propagador de medidas preventivas à sociedade. Os golpes virtuais superaram os golpes físicos em Minas Gerais e a Polícia Militar definiu como estratégia de combate o desenvolvimento de campanhas de socialização para permitir ao cidadão identificar os golpes. 'Realmente os golpes virtuais cresceram muito. E só há uma maneira de evitar: com educação da sociedade', ressalta o Comandante-Geral. 'Para atuar, investimos no treinamento. O policial militar tem de ser um propagador de medidas preventivas'. Um fator positivo no combate ao crime virtual é a integração de dados entre os órgãos públicos e as polícias militar e civil.\" (Ana Paula Lobo, Convergência Digital, out. 2025).\n\n" + INSTRUCAO_PADRAO_CRS;
+
+    // Acervo Curado Oficial (23 Provas Oficiais CRS/PMMG + 22 Simulados Preditivos CRS/PMMG)
     const DEFAULT_FALLBACK_RUBRICS = [
-      // --- BLOCO 1: 22 TEMAS OFICIAIS DE PROVAS ANTERIORES CRS / PMMG (CHO, CFO, CFS) ---
+      // --- BLOCO 1: 23 TEMAS OFICIAIS DE PROVAS ANTERIORES CRS / PMMG (CHO, CFO, CFS) ---
+      {
+        id: "oficial-cho-2026", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
+        banca: "CRS / PMMG (Prova Oficial CHO 2026)",
+        titulo_tema: "“Atuação da Polícia Militar de Minas Gerais junto às vítimas dos crimes cibernéticos”: proteção e ação",
+        textos_motivadores: TEXTO_APOIO_CHO_2026, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
       {
         id: "oficial-cho-2025", sheet_id: "TODOS", categoria: "OFICIAL_PMMG",
         banca: "CRS / PMMG (Prova Oficial CHO 2025)",
@@ -1471,84 +1478,145 @@
         textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
       },
 
-      // --- BLOCO 2: 10 TEMAS SIMULADOS DE ALTA RELEVÂNCIA (CHO & COMUNS AOS CERTAMES) ---
+      // --- BLOCO 2: 22 TEMAS SIMULADOS E PREDITIVOS (100% PADRONIZADOS CRS / PMMG) ---
       {
         id: "simulado-cho-01", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
-        banca: "Radar Preditivo CRS / PMMG (Foco CHO)",
+        banca: "CRS / PMMG (Simulado — Foco CHO)",
         titulo_tema: "A Polícia Comunitária como filosofia e estratégia organizacional no comandamento do setor sob responsabilidade do Tenente PM",
         textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
       },
       {
         id: "simulado-cho-02", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
-        banca: "Radar Preditivo CRS / PMMG (Foco CHO)",
+        banca: "CRS / PMMG (Simulado — Foco CHO)",
         titulo_tema: "O Oficial da PMMG como fomentador da potencialização da capacidade de primeira resposta",
         textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
       },
       {
         id: "simulado-cho-03", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
-        banca: "Radar Preditivo CRS / PMMG (Foco CHO)",
+        banca: "CRS / PMMG (Simulado — Foco CHO)",
         titulo_tema: "Estratégias e ferramentas na busca de se aumentar a eficiência no emprego do recurso público",
         textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
       },
       {
         id: "simulado-cho-04", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
-        banca: "Radar Preditivo CRS / PMMG (Foco CHO)",
+        banca: "CRS / PMMG (Simulado — Foco CHO)",
         titulo_tema: "O fortalecimento do serviço de inteligência policial como subsídio para redução criminal",
         textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
       },
       {
         id: "simulado-cho-05", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
-        banca: "Radar Preditivo CRS / PMMG (Foco CHO)",
+        banca: "CRS / PMMG (Simulado — Foco CHO)",
         titulo_tema: "O cuidado com a saúde mental do policial militar como prioridade absoluta para manutenção de resultados duradouros",
         textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
       },
       {
+        id: "simulado-cho-06", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "CRS / PMMG (Simulado — Foco CHO)",
+        titulo_tema: "Políticas públicas para preservação da ordem pública e cidadania",
+        textos_motivadores: "Aborde: competências constitucionais das Polícias Militares, preservação da ordem pública democrática, políticas públicas de segurança e garantia dos direitos fundamentais do cidadão. " + INSTRUCAO_PADRAO_CRS,
+        min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "simulado-cho-07", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "CRS / PMMG (Simulado — Foco CHO)",
+        titulo_tema: "Direitos humanos e atuação educativa do policial militar no trabalho preventivo e repressivo",
+        textos_motivadores: "Aborde: a promoção dos direitos humanos tanto no policiamento preventivo quanto no repressivo e as formas de atuação educativa do policial militar perante a sociedade. " + INSTRUCAO_PADRAO_CRS,
+        min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
         id: "simulado-comum-01", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
-        banca: "Radar Preditivo CRS / PMMG (Comum aos Certames)",
+        banca: "CRS / PMMG (Simulado — Geral PMMG)",
         titulo_tema: "250 anos da PMMG: a sustentabilidade e longevidade institucional como pressupostos para garantias e direitos de todo policial militar e segurança de toda uma sociedade",
         textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
       },
       {
         id: "simulado-comum-02", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
-        banca: "Radar Preditivo CRS / PMMG (Comum aos Certames)",
+        banca: "CRS / PMMG (Simulado — Geral PMMG)",
         titulo_tema: "Câmeras corporais e o objetivo de reduzir a violência policial e melhorar a legitimidade e a confiança nas pessoas",
         textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
       },
       {
         id: "simulado-comum-03", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
-        banca: "Radar Preditivo CRS / PMMG (Comum aos Certames)",
+        banca: "CRS / PMMG (Simulado — Geral PMMG)",
         titulo_tema: "A importância e necessidade de fundada suspeita em abordagens, busca pessoal, veicular e domiciliar",
         textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
       },
       {
         id: "simulado-comum-04", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
-        banca: "Radar Preditivo CRS / PMMG (Comum aos Certames)",
+        banca: "CRS / PMMG (Simulado — Geral PMMG)",
         titulo_tema: "A PMMG e o aprimoramento do atendimento à minoria e aos grupos vulneráveis",
         textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
       },
       {
         id: "simulado-comum-05", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
-        banca: "Radar Preditivo CRS / PMMG (Comum aos Certames)",
+        banca: "CRS / PMMG (Simulado — Geral PMMG)",
         titulo_tema: "A integração da Defesa Civil e órgãos de segurança pública para prevenção e atuação corretiva em casos de desastres",
         textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
       },
-
-      // --- BLOCO 3: TEMAS DE OUTRAS PMs ADAPTADOS AO PADRÃO CRS / PMMG ---
       {
-        id: "adaptado-pms-1", sheet_id: "TODOS", categoria: "ADAPTADO_PMS",
-        banca: "Cobrado na PMESP / PMDF (Adaptado p/ CRS-PMMG)",
+        id: "simulado-comum-06", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "CRS / PMMG (Simulado — Geral PMMG)",
+        titulo_tema: "A importância da tecnologia para a garantia da segurança pública na sociedade brasileira",
+        textos_motivadores: "Aborde: tecnologia aplicada à segurança pública, inteligência artificial, eficiência das ações de segurança e equilíbrio com a privacidade e os direitos individuais. " + INSTRUCAO_PADRAO_CRS,
+        min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "simulado-comum-07", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "CRS / PMMG (Simulado — Geral PMMG)",
+        titulo_tema: "Os impactos das fake news em situações emergenciais relacionadas à segurança pública brasileira",
+        textos_motivadores: "Aborde: divulgação de informações falsas em emergências e calamidades públicas, redes sociais e desinformação, atuação das forças de segurança e consequências para a sociedade. " + INSTRUCAO_PADRAO_CRS,
+        min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "simulado-comum-08", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "CRS / PMMG (Simulado — Geral PMMG)",
+        titulo_tema: "Vantagens e desvantagens do uso de câmeras de segurança nos coletes policiais",
+        textos_motivadores: "Apresente posicionamento fundamentado abordando: utilização de câmeras nas fardas policiais, vantagens operacionais/transparência e eventuais desvantagens ou desafios técnicos. " + INSTRUCAO_PADRAO_CRS,
+        min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "simulado-comum-09", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "CRS / PMMG (Simulado — Geral PMMG)",
+        titulo_tema: "Atuação das Polícias Militares na preservação da democracia plena e do direito constitucional à segurança pública",
+        textos_motivadores: "Aborde obrigatoriamente: competências constitucionais das Polícias Militares (art. 144 da CF/88), a democracia como valor constitucional e a segurança pública como direito e dever de todos. " + INSTRUCAO_PADRAO_CRS,
+        min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "simulado-comum-10", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "CRS / PMMG (Simulado — Geral PMMG)",
+        titulo_tema: "A importância da valorização da saúde mental no ambiente de trabalho policial militar",
+        textos_motivadores: "Aborde: saúde mental e bem-estar do militar, ambiente organizacional saudável, prevenção de relações abusivas e equilíbrio entre vida pessoal e produtividade operacional. " + INSTRUCAO_PADRAO_CRS,
+        min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "simulado-comum-11", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "CRS / PMMG (Simulado — Geral PMMG)",
+        titulo_tema: "Incivilidade e desrespeito às normas de convivência: cidadania e preservação da ordem pública",
+        textos_motivadores: "Aborde: impactos de condutas incivis (desrespeito a vagas reservadas, idosos, meio ambiente e normas coletivas) e medidas preventivas/educativas para fortalecer a convivência social e a ordem pública. " + INSTRUCAO_PADRAO_CRS,
+        min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "simulado-comum-12", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "CRS / PMMG (Simulado — Geral PMMG)",
+        titulo_tema: "Racismo como problema estrutural no Brasil: criminalização e representatividade nas instituições",
+        textos_motivadores: "Aborde: o racismo como problema estrutural no Brasil, a importância da criminalização e rigor legal, e a necessidade de representatividade e educação em direitos humanos para combater a discriminação. " + INSTRUCAO_PADRAO_CRS,
+        min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
+      },
+      {
+        id: "simulado-comum-13", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "CRS / PMMG (Simulado — Geral PMMG)",
         titulo_tema: "Polícia Comunitária e Prevenção Primária: A Aproximação entre a PMMG e a Sociedade",
         textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
       },
       {
-        id: "adaptado-pms-2", sheet_id: "TODOS", categoria: "ADAPTADO_PMS",
-        banca: "Cobrado na PMGO / PMPA (Adaptado p/ CRS-PMMG)",
+        id: "simulado-comum-14", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "CRS / PMMG (Simulado — Geral PMMG)",
         titulo_tema: "Uso Diferenciado da Força, Transparência e Legitimidade da Atuação Policial Militar",
         textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
       },
       {
-        id: "adaptado-ppmg", sheet_id: "TODOS", categoria: "ADAPTADO_PMS",
-        banca: "Polícia Penal / Selecon / FGV (Adaptado)",
+        id: "simulado-comum-15", sheet_id: "TODOS", categoria: "PREDITIVO_CRS",
+        banca: "CRS / PMMG (Simulado — Geral PMMG)",
         titulo_tema: "O Sistema Prisional Brasileiro entre a Punição e a Ressocialização",
         textos_motivadores: INSTRUCAO_PADRAO_CRS, min_linhas: 20, max_linhas: 30, nota_maxima: 100, criterios_banca: PADRAO_CRITERIOS_CRS
       }
@@ -1927,23 +1995,53 @@
     // ========================================================================
     // MÓDULO 4: CENTRAL DE TEMAS, FILTRO DE CATEGORIAS E RADAR PREDITIVO IA
     // ========================================================================
+    function sanitizeBancaNameToCRS(item) {
+      const b = String(item?.banca || '').trim();
+      if (/Prova Oficial/i.test(b)) return b;
+      if (/Foco CHO/i.test(b)) return 'CRS / PMMG (Simulado — Foco CHO)';
+      return 'CRS / PMMG (Simulado — Geral PMMG)';
+    }
+
     function detectRubricCategory(item) {
-      if (item.categoria) return item.categoria;
-      const b = (item.banca || '').toUpperCase();
-      if (b.includes('ADAPTADO') || b.includes('SELECON') || b.includes('PMESP') || b.includes('PMDF') || b.includes('PMGO')) {
-        return 'ADAPTADO_PMS';
+      const b = String(item?.banca || '').toUpperCase();
+      if (b.includes('PROVA OFICIAL') || item?.categoria === 'OFICIAL_PMMG') {
+        return 'OFICIAL_PMMG';
       }
-      if (b.includes('PREDITIVO') || b.includes('INÉDITO')) {
-        return 'PREDITIVO_CRS';
-      }
-      return 'OFICIAL_PMMG';
+      return 'PREDITIVO_CRS';
     }
 
     function getCategoryLabel(cat) {
-      if (cat === 'OFICIAL_PMMG') return '🏆 TEMA OFICIAL CRS / PMMG';
-      if (cat === 'ADAPTADO_PMS') return '🛡️ TEMA DE OUTRAS PMs ADAPTADO P/ PMMG';
-      if (cat === 'PREDITIVO_CRS') return '🎯 RADAR PREDITIVO INÉDITO (CRS / PMMG)';
-      return '📚 ACERVO CHICO CONCURSOS';
+      if (cat === 'OFICIAL_PMMG') return '🏆 PROVA OFICIAL CRS / PMMG';
+      return '🎯 TEMA SIMULADO CRS / PMMG';
+    }
+
+    // Garante que as Provas Oficiais CRS/PMMG (começando pelo CHO 2026) fiquem SEMPRE em 1º lugar
+    function sortRubricsCRSFirst(list) {
+      const canonicalOrder = new Map();
+      DEFAULT_FALLBACK_RUBRICS.forEach((item, index) => {
+        canonicalOrder.set((item.titulo_tema || '').toLowerCase().trim(), index);
+      });
+
+      const getCategoryPriority = (cat) => (cat === 'OFICIAL_PMMG' ? 1 : 2);
+
+      return [...list].sort((a, b) => {
+        const aIsLiveAI = String(a.id || '').startsWith('ai-');
+        const bIsLiveAI = String(b.id || '').startsWith('ai-');
+        if (aIsLiveAI && !bIsLiveAI) return -1;
+        if (!aIsLiveAI && bIsLiveAI) return 1;
+
+        const catA = getCategoryPriority(detectRubricCategory(a));
+        const catB = getCategoryPriority(detectRubricCategory(b));
+        if (catA !== catB) return catA - catB;
+
+        const keyA = (a.titulo_tema || '').toLowerCase().trim();
+        const keyB = (b.titulo_tema || '').toLowerCase().trim();
+        const idxA = canonicalOrder.has(keyA) ? canonicalOrder.get(keyA) : 9999;
+        const idxB = canonicalOrder.has(keyB) ? canonicalOrder.get(keyB) : 9999;
+        if (idxA !== idxB) return idxA - idxB;
+
+        return String(a.banca || '').localeCompare(String(b.banca || ''), 'pt-BR');
+      });
     }
 
     async function loadRubricsFromSupabase() {
@@ -1960,23 +2058,34 @@
           if (!error && data && data.length > 0) {
             supaList = data
               .filter(r => !r.sheet_id || r.sheet_id === 'TODOS' || r.sheet_id === SHEET_ID)
-              .map(r => ({ ...r, categoria: detectRubricCategory(r) }));
+              .filter(r => r.titulo_tema !== 'Atuação da Polícia Militar de Minas Gerais junto às vítimas de crimes virtuais')
+              .map(r => {
+                const cat = detectRubricCategory(r);
+                return {
+                  ...r,
+                  categoria: cat,
+                  banca: sanitizeBancaNameToCRS(r)
+                };
+              });
           }
         }
       } catch (e) {
         console.warn("Usando bancas padrão locais:", e);
       }
 
-      // Mescla os temas do Supabase com o acervo curado sem duplicar títulos
-      const existingTitles = new Set(supaList.map(i => (i.titulo_tema || '').toLowerCase().trim()));
-      const merged = [...supaList];
-      DEFAULT_FALLBACK_RUBRICS.forEach(item => {
-        if (!existingTitles.has(item.titulo_tema.toLowerCase().trim())) {
+      // Mescla priorizando o acervo oficial atualizado (CHO 2026 em 1º lugar) sem duplicar títulos
+      const merged = [...DEFAULT_FALLBACK_RUBRICS];
+      const existingTitles = new Set(merged.map(i => (i.titulo_tema || '').toLowerCase().trim()));
+
+      supaList.forEach(item => {
+        const cleanKey = (item.titulo_tema || '').toLowerCase().trim();
+        if (!existingTitles.has(cleanKey)) {
           merged.push(item);
+          existingTitles.add(cleanKey);
         }
       });
 
-      allLoadedRubrics = merged;
+      allLoadedRubrics = sortRubricsCRSFirst(merged);
       filterRubricsByCategory();
     }
 
@@ -2063,8 +2172,8 @@
         const newRubric = {
           id: 'ai-' + Date.now(),
           sheet_id: SHEET_ID || 'TODOS',
-          categoria: mode === 'adaptado_outras_pms' ? 'ADAPTADO_PMS' : 'PREDITIVO_CRS',
-          banca: generated.banca || (mode === 'adaptado_outras_pms' ? 'Outras PMs (Adaptado p/ CRS-PMMG)' : 'Radar Preditivo CRS / PMMG'),
+          categoria: 'PREDITIVO_CRS',
+          banca: generated.banca || (mode === 'foco_cho_gestao' ? 'CRS / PMMG (Simulado — Foco CHO)' : 'CRS / PMMG (Simulado — Geral PMMG)'),
           titulo_tema: generated.titulo_tema || 'Segurança Pública e Garantias Constitucionais em Minas Gerais',
           textos_motivadores: generated.textos_motivadores || '',
           min_linhas: Number(generated.min_linhas) || 20,
@@ -2436,13 +2545,356 @@
     }
 
     // ========================================================================
-    // MÓDULO 7: HISTÓRICO DE REDAÇÕES E LEITURA DE VOZ (TTS)
+    // MÓDULO 7: HISTÓRICO, GRÁFICO DE EVOLUÇÃO E 🎯 PRINCIPAIS ERROS (RAIO-X)
     // ========================================================================
+    let lastLoadedHistoryData = [];
+
+    function extractSubtotalsFromHistoryItem(item) {
+      const criterios = item?.relatorio_json?.criterios;
+      if (!Array.isArray(criterios) || criterios.length === 0) {
+        return { gramatica: null, conteudo: null };
+      }
+      let gramatica = 0;
+      let conteudo = 0;
+      criterios.forEach((c, idx) => {
+        const val = Number(c?.nota_obtida) || 0;
+        if (idx < 3) gramatica += val;
+        else conteudo += val;
+      });
+      return { gramatica, conteudo };
+    }
+
+    function openHistoryItemReport(item) {
+      const histModal = document.getElementById('historyModal');
+      if (histModal) histModal.style.display = 'none';
+      const errModal = document.getElementById('mainErrorsModal');
+      if (errModal) errModal.style.display = 'none';
+      if (!item || !item.relatorio_json) return;
+
+      lastGradingResult = item.relatorio_json;
+      renderGradingReport(item.relatorio_json, item.motor_ia || 'Histórico');
+
+      const cleanBanca = typeof sanitizeBancaNameToCRS === 'function'
+        ? sanitizeBancaNameToCRS({ banca: item.banca })
+        : (item.banca || 'CRS / PMMG');
+      const titleEl = document.getElementById('resultBancaTitle');
+      if (titleEl && item.tema) {
+        titleEl.textContent = `${cleanBanca} — ${item.tema}`;
+      }
+      goToStep(3);
+    }
+
+    function getCoachingTipForCriterion(critName) {
+      const n = String(critName || '').toUpperCase();
+      if (n.includes('ORTOGRAFIA') || n.startsWith('1.')) {
+        return 'Atenção à grafia, acentuação, iniciais maiúsculas em órgãos/sistemas (CTPM, Hélios, PMMG) e hífen obrigatório em "atividade-fim" e "atividade-meio".';
+      }
+      if (n.includes('MORFOSSINTAXE') || n.startsWith('2.')) {
+        return 'Revise crase antes de palavras femininas ("adaptar às inovações"), nunca use crase antes de masculino/plural sem artigo e confira a concordância sujeito-verbo.';
+      }
+      if (n.includes('PONTUAÇÃO') || n.startsWith('3.')) {
+        return 'Nunca coloque ponto final no Título, nunca separe sujeito e verbo com vírgula e isole todos os conectivos intercalados ("Entende-se, portanto, que...").';
+      }
+      if (n.includes('CONTEÚDO I ') || n.startsWith('4.')) {
+        return 'Sublinhe os DOIS núcleos do tema antes de escrever (ex: atuação da PMMG + junto às vítimas) e garanta que ambos apareçam nos desenvolvimentos.';
+      }
+      if (n.includes('CONTEÚDO II') || n.startsWith('5.')) {
+        return 'Não fique preso apenas às ideias do texto motivador! Cite repertório concreto da PMMG (POP, Plano Estratégico 2024-2027, QAPP, Sistema Hélios, ISP, Memorandos).';
+      }
+      if (n.includes('CONTEÚDO III') || n.startsWith('6.')) {
+        return 'Regra CRS: colocou ponto final ou mudou de parágrafo, insira um articulador! Nunca comece frase com "Pois" e evite "Diante do exposto".';
+      }
+      if (n.includes('CONTEÚDO IV') || n.startsWith('7.')) {
+        return 'Mantenha a estrutura 5–9–9–5 (28 a 30 linhas). Nunca faça parágrafo de 4 linhas e evite deixar apenas 1 palavra isolada na última linha do parágrafo.';
+      }
+      if (n.includes('CONTEÚDO V') || n.startsWith('8.')) {
+        return 'Na 1ª menção escreva "Polícia Militar de Minas Gerais (PMMG)" e, em todas as seguintes, use apenas "PMMG" SEM parênteses. Evite repetir palavras próximas.';
+      }
+      return 'Revise os apontamentos detalhados deste quesito antes do próximo treino.';
+    }
+
+    function classifyErrorCategory(ruleStr) {
+      const r = String(ruleStr || '').toUpperCase();
+      if (r.includes('CONTEÚDO I ') || r.includes('CONTEUDO I ') || r.includes('PERTINÊNCIA') || r.includes('TEMA')) return 'Conteúdo I — Pertinência e Recorte do Tema';
+      if (r.includes('CONTEÚDO II') || r.includes('CONTEUDO II') || r.includes('ARGUMENTAÇÃO') || r.includes('INFORMATIVIDADE')) return 'Conteúdo II — Argumentação e Informatividade';
+      if (r.includes('CONTEÚDO III') || r.includes('CONTEUDO III') || r.includes('ARTICULADOR') || r.includes('CONECTIVO')) return 'Conteúdo III — Uso de Articuladores';
+      if (r.includes('CONTEÚDO IV') || r.includes('CONTEUDO IV') || r.includes('PARÁGRAFO') || r.includes('LINHAS')) return 'Conteúdo IV — Organização de Parágrafos';
+      if (r.includes('CONTEÚDO V') || r.includes('CONTEUDO V') || r.includes('SIGLA') || r.includes('VOCABULAR')) return 'Conteúdo V — Propriedade Vocabular e Siglas';
+      if (r.startsWith('MS') || r.includes('MORFOSSINTAXE') || r.includes('CRASE') || r.includes('CONCORDÂNCIA') || r.includes('REGÊNCIA')) return 'MS — Morfossintaxe (Crase, Concordância e Regência)';
+      if (r.startsWith('P ') || r.startsWith('P-') || r.includes('PONTUAÇÃO') || r.includes('VÍRGULA') || r.includes('TÍTULO')) return 'P — Pontuação (Vírgulas e Título)';
+      if (r.startsWith('O ') || r.startsWith('O-') || r.includes('ORTOGRAFIA') || r.includes('HÍFEN') || r.includes('ACENT')) return 'O — Ortografia (Grafia, Acentuação e Hífen)';
+      return ruleStr || 'Norma-Padrão CRS / PMMG';
+    }
+
+    function openMainErrorsModal() {
+      if (!lastLoadedHistoryData || lastLoadedHistoryData.length === 0) {
+        showToast("Nenhuma redação encontrada para gerar o Raio-X.", "warning");
+        return;
+      }
+
+      let errModal = document.getElementById('mainErrorsModal');
+      if (!errModal) {
+        errModal = document.createElement('div');
+        errModal.id = 'mainErrorsModal';
+        errModal.className = 'chico-modal-overlay';
+        errModal.setAttribute('role', 'dialog');
+        errModal.setAttribute('aria-modal', 'true');
+        errModal.innerHTML = `
+          <div class="chico-modal-box" style="max-width: 760px;">
+            <h2 class="chico-modal-title"><i class="fas fa-crosshairs"></i> 🎯 Principais Erros (Raio-X)</h2>
+            <div id="mainErrorsBody" style="max-height: 70vh; overflow-y: auto; padding-right: 4px;"></div>
+            <div style="display:flex; justify-content:center; gap:12px; margin-top:18px; flex-wrap:wrap;">
+              <button class="btn-dark-secondary" onclick="document.getElementById('mainErrorsModal').style.display='none'; document.getElementById('historyModal').style.display='flex';">
+                <i class="fas fa-arrow-left"></i> Voltar ao Histórico
+              </button>
+              <button class="btn-gold-primary" onclick="document.getElementById('mainErrorsModal').style.display='none';" style="padding:10px 22px; font-size:0.9em;">
+                Fechar Raio-X
+              </button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(errModal);
+      }
+
+      const histModal = document.getElementById('historyModal');
+      if (histModal) histModal.style.display = 'none';
+      errModal.style.display = 'flex';
+
+      const body = document.getElementById('mainErrorsBody');
+
+      // 1. AGREGAÇÃO DE PONTOS PERDIDOS POR QUESITO (EM ORDEM DECRESCENTE)
+      const criteriaMap = new Map();
+      const detailedGroupsMap = new Map();
+      let totalLostAll = 0;
+
+      lastLoadedHistoryData.forEach(item => {
+        const dateStr = new Date(item.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+        const criterios = item?.relatorio_json?.criterios || [];
+
+        criterios.forEach(c => {
+          const nome = String(c.nome || 'Critério').trim();
+          const max = Number(c.nota_maxima) || 0;
+          const obt = Number(c.nota_obtida) || 0;
+          const lost = Math.max(0, max - obt);
+
+          if (!criteriaMap.has(nome)) {
+            criteriaMap.set(nome, {
+              nome,
+              lostPoints: 0,
+              maxPossibleSum: 0,
+              essaysWithLoss: 0,
+              totalEssays: 0
+            });
+          }
+          const entry = criteriaMap.get(nome);
+          entry.lostPoints += lost;
+          entry.maxPossibleSum += max;
+          entry.totalEssays += 1;
+          if (lost > 0) entry.essaysWithLoss += 1;
+          totalLostAll += lost;
+        });
+
+        const desvios = item?.relatorio_json?.desvios_detalhados || [];
+        desvios.forEach(d => {
+          const catTitle = classifyErrorCategory(d.regra_violada);
+          if (!detailedGroupsMap.has(catTitle)) {
+            detailedGroupsMap.set(catTitle, []);
+          }
+          detailedGroupsMap.get(catTitle).push({
+            ...d,
+            dateStr,
+            tema: item.tema || '',
+            rawItem: item
+          });
+        });
+      });
+
+      // Ordena os critérios em ORDEM DECRESCENTE de pontos perdidos
+      const sortedCriteria = Array.from(criteriaMap.values()).sort((a, b) => {
+        if (b.lostPoints !== a.lostPoints) return b.lostPoints - a.lostPoints;
+        return b.essaysWithLoss - a.essaysWithLoss;
+      });
+
+      // Ordena os grupos de erros reais em ORDEM DECRESCENTE de quantidade de ocorrências
+      const sortedErrorGroups = Array.from(detailedGroupsMap.entries()).sort((a, b) => b[1].length - a[1].length);
+
+      const maxSingleCriterionLoss = sortedCriteria.length > 0 ? Math.max(1, sortedCriteria[0].lostPoints) : 1;
+
+      let html = `
+        <div style="background:rgba(210,172,71,0.08); border-left:4px solid #FFD700; padding:12px; border-radius:0 8px 8px 0; margin-bottom:16px; font-size:0.9em; color:#eee; line-height:1.45;">
+          📊 <strong>Diagnóstico Acumulado (${lastLoadedHistoryData.length} redações analisadas):</strong>
+          Abaixo estão listados <strong>em ordem decrescente</strong> os quesitos e apontamentos que mais descontaram pontos das suas redações até agora.
+        </div>
+
+        <div style="font-size:0.92em; font-weight:800; color:#FFD700; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px;">
+          <i class="fas fa-sort-amount-down"></i> 1. Ranking Decrescente de Perda de Pontos por Quesito
+        </div>
+      `;
+
+      sortedCriteria.forEach((crit, idx) => {
+        const hasLoss = crit.lostPoints > 0;
+        const barPct = hasLoss ? Math.max(8, Math.round((crit.lostPoints / maxSingleCriterionLoss) * 100)) : 0;
+        const badgeColor = idx === 0 && hasLoss ? '#ff4d4d' : (hasLoss ? '#f39c12' : '#2ecc71');
+        const rankLabel = hasLoss ? `${idx + 1}º Maior Foco de Desconto` : '✅ Quesito Gabaritado';
+
+        html += `
+          <div style="background:#161616; border:1px solid ${hasLoss ? '#332222' : '#223328'}; border-left:4px solid ${badgeColor}; border-radius:8px; padding:12px 14px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
+              <div>
+                <span style="font-size:0.74em; font-weight:800; color:#0D0D09; background:${badgeColor}; padding:2px 8px; border-radius:4px; margin-right:6px;">
+                  ${rankLabel}
+                </span>
+                <strong style="color:#fff; font-size:0.96em;">${escapeHTML(crit.nome)}</strong>
+              </div>
+              <span style="color:${badgeColor}; font-weight:900; font-size:0.95em;">
+                ${hasLoss ? `-${crit.lostPoints} pts perdidos (${crit.essaysWithLoss}/${crit.totalEssays} redações)` : '0 pts perdidos'}
+              </span>
+            </div>
+            <div style="width:100%; height:7px; background:#252525; border-radius:4px; overflow:hidden; margin-bottom:8px;">
+              <div style="width:${barPct}%; height:100%; background:${badgeColor}; border-radius:4px;"></div>
+            </div>
+            <div style="font-size:0.84em; color:#ccc; line-height:1.4;">
+              💡 <strong>Como corrigir:</strong> ${escapeHTML(getCoachingTipForCriterion(crit.nome))}
+            </div>
+          </div>
+        `;
+      });
+
+      html += `
+        <div style="font-size:0.92em; font-weight:800; color:#FFD700; margin:18px 0 10px 0; text-transform:uppercase; letter-spacing:0.5px;">
+          <i class="fas fa-highlighter"></i> 2. Caderno de Erros Reais na Prática (Ordem Decrescente de Frequência)
+        </div>
+      `;
+
+      if (sortedErrorGroups.length === 0) {
+        html += `<p style="color:#2ecc71; font-weight:bold; padding:12px; background:#141f18; border-radius:8px;">🎉 Parabéns! Nenhum desvio específico foi registrado nas suas redações salvas.</p>`;
+      } else {
+        sortedErrorGroups.forEach(([groupName, items], groupIdx) => {
+          html += `
+            <div style="background:#141414; border:1px solid #2b2b2b; border-radius:8px; padding:12px; margin-bottom:12px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; border-bottom:1px solid #262626; padding-bottom:8px; margin-bottom:10px;">
+                <span style="color:#F7EF8A; font-weight:800; font-size:0.94em;">
+                  ${groupIdx + 1}º) ${escapeHTML(groupName)}
+                </span>
+                <span style="background:rgba(255,77,77,0.15); color:#ff7675; border:1px solid rgba(255,77,77,0.35); padding:2px 9px; border-radius:12px; font-size:0.78em; font-weight:bold;">
+                  ${items.length} ocorrência(s)
+                </span>
+              </div>
+          `;
+
+          items.forEach((errItem) => {
+            html += `
+              <div style="background:#1a1212; border-left:3px solid #ff5555; padding:10px; border-radius:0 6px 6px 0; margin-bottom:8px; font-size:0.88em;">
+                <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px; margin-bottom:4px; font-size:0.84em; color:#aaa;">
+                  <span>📍 ${escapeHTML(errItem.linha || 'No texto')} • <strong style="color:#FFD700;">${escapeHTML(errItem.regra_violada || '')}</strong></span>
+                  <span>📅 ${errItem.dateStr}</span>
+                </div>
+                <div style="margin-bottom:4px;">
+                  <span class="wrong-snippet">"${escapeHTML(errItem.trecho_original || '')}"</span>
+                  <i class="fas fa-arrow-right" style="margin:0 6px; color:#888;"></i>
+                  <span class="right-snippet">"${escapeHTML(errItem.correcao_sugerida || '')}"</span>
+                </div>
+                <div style="color:#ccc; font-size:0.9em;">${escapeHTML(errItem.explicacao || '')}</div>
+              </div>
+            `;
+          });
+
+          html += `</div>`;
+        });
+      }
+
+      body.innerHTML = html;
+    }
+
+    async function deleteSingleHistoryItem(itemId, btnElement, event) {
+      if (event) event.stopPropagation();
+      if (!supabaseClient || !userEmail || !itemId) return;
+
+      if (btnElement.getAttribute('data-confirming') !== 'true') {
+        btnElement.setAttribute('data-confirming', 'true');
+        btnElement.innerHTML = '<i class="fas fa-check"></i> Confirmar?';
+        btnElement.style.background = '#c0392b';
+        btnElement.style.color = '#fff';
+        btnElement.style.borderColor = '#ff4d4d';
+        setTimeout(() => {
+          if (btnElement && btnElement.isConnected) {
+            btnElement.removeAttribute('data-confirming');
+            btnElement.innerHTML = '<i class="fas fa-trash-alt"></i>';
+            btnElement.style.background = 'rgba(255, 77, 77, 0.12)';
+            btnElement.style.color = '#ff7675';
+            btnElement.style.borderColor = 'rgba(255, 77, 77, 0.35)';
+          }
+        }, 3500);
+        return;
+      }
+
+      btnElement.disabled = true;
+      btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+      try {
+        const { error } = await supabaseClient
+          .from('redacao_historico')
+          .delete()
+          .eq('id', itemId)
+          .eq('user_email', userEmail);
+
+        if (error) throw error;
+        localStorage.removeItem('chicoEssayGradeCache_v1');
+        showToast("Redação removida do histórico!", "success");
+        await openHistoryModal();
+      } catch (e) {
+        console.error("Erro ao excluir redação:", e);
+        showToast("Erro ao excluir. Verifique se liberou a permissão DELETE no SQL do Supabase.", "error");
+        btnElement.disabled = false;
+        btnElement.innerHTML = '<i class="fas fa-trash-alt"></i>';
+      }
+    }
+
+    async function clearAllUserHistory(btnElement) {
+      if (!supabaseClient || !userEmail) return;
+
+      if (btnElement.getAttribute('data-confirming') !== 'true') {
+        btnElement.setAttribute('data-confirming', 'true');
+        btnElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Clique novamente p/ apagar tudo';
+        btnElement.style.background = '#c0392b';
+        btnElement.style.color = '#fff';
+        setTimeout(() => {
+          if (btnElement && btnElement.isConnected) {
+            btnElement.removeAttribute('data-confirming');
+            btnElement.innerHTML = '<i class="fas fa-trash"></i> Limpar Todo o Histórico';
+            btnElement.style.background = 'rgba(255, 77, 77, 0.12)';
+            btnElement.style.color = '#ff7675';
+          }
+        }, 4000);
+        return;
+      }
+
+      btnElement.disabled = true;
+      btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Apagando...';
+
+      try {
+        const { error } = await supabaseClient
+          .from('redacao_historico')
+          .delete()
+          .eq('user_email', userEmail);
+
+        if (error) throw error;
+        localStorage.removeItem('chicoEssayGradeCache_v1');
+        showToast("Todo o histórico foi limpo com sucesso!", "success");
+        await openHistoryModal();
+      } catch (e) {
+        console.error("Erro ao limpar histórico:", e);
+        showToast("Erro ao limpar histórico no banco.", "error");
+        btnElement.disabled = false;
+      }
+    }
+
     async function openHistoryModal() {
       const modal = document.getElementById('historyModal');
       const list = document.getElementById('historyListContainer');
       modal.style.display = 'flex';
-      list.innerHTML = '<p style="text-align:center; color:#888;"><i class="fas fa-spinner fa-spin"></i> Buscando suas redações...</p>';
+      list.style.maxHeight = '74vh';
+      list.innerHTML = '<p style="text-align:center; color:#888; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Buscando suas redações e gerando gráfico de evolução...</p>';
 
       if (!supabaseClient || !userEmail) {
         list.innerHTML = '<p style="text-align:center; color:#888;">Histórico indisponível.</p>';
@@ -2457,29 +2909,217 @@
         .limit(15);
 
       if (error || !data || data.length === 0) {
-        list.innerHTML = '<p style="text-align:center; color:#888;">Você ainda não possui redações corrigidas.</p>';
+        lastLoadedHistoryData = [];
+        list.innerHTML = '<p style="text-align:center; color:#888; padding:20px;">Você ainda não possui redações corrigidas. Envie sua 1ª redação para inaugurar o gráfico de evolução!</p>';
         return;
       }
 
+      lastLoadedHistoryData = data;
       list.innerHTML = '';
+
+      // 1. CÁLCULO DE MÉTRICAS E KPIS (Ordem cronológica: da mais antiga para a mais recente)
+      const chrono = [...data].reverse();
+      const scores = chrono.map(d => Number(d.nota_total) || 0);
+      const maxScore = Math.max(...scores);
+      const avgScore = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1).replace('.0', '');
+      const diffEvolution = scores.length > 1 ? (scores[scores.length - 1] - scores[0]) : 0;
+      const diffFormatted = scores.length > 1
+        ? (diffEvolution > 0 ? `+${diffEvolution} pts` : `${diffEvolution} pts`)
+        : '1ª Prova';
+      const diffColor = diffEvolution > 0 ? '#2ecc71' : (diffEvolution < 0 ? '#f39c12' : '#FFD700');
+
+      // 2. PAINEL DE INDICADORES (KPIs)
+      const kpiGrid = document.createElement('div');
+      kpiGrid.style.cssText = 'display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:14px;';
+      kpiGrid.innerHTML = `
+        <div style="background:#161616; border:1px solid #2b2b2b; border-top:2px solid #FFD700; border-radius:8px; padding:10px; text-align:center;">
+          <div style="font-size:0.75em; color:#aaa; text-transform:uppercase;">🏆 Recorde</div>
+          <div style="font-size:1.35em; font-weight:900; color:#FFD700; margin-top:2px;">${maxScore} <span style="font-size:0.6em; color:#888;">pts</span></div>
+        </div>
+        <div style="background:#161616; border:1px solid #2b2b2b; border-top:2px solid #D2AC47; border-radius:8px; padding:10px; text-align:center;">
+          <div style="font-size:0.75em; color:#aaa; text-transform:uppercase;">📊 Média CRS</div>
+          <div style="font-size:1.35em; font-weight:900; color:#F7EF8A; margin-top:2px;">${avgScore} <span style="font-size:0.6em; color:#888;">pts</span></div>
+        </div>
+        <div style="background:#161616; border:1px solid #2b2b2b; border-top:2px solid ${diffColor}; border-radius:8px; padding:10px; text-align:center;">
+          <div style="font-size:0.75em; color:#aaa; text-transform:uppercase;">📈 Evolução</div>
+          <div style="font-size:1.35em; font-weight:900; color:${diffColor}; margin-top:2px;">${diffFormatted}</div>
+        </div>
+        <div style="background:#161616; border:1px solid #2b2b2b; border-top:2px solid #3498db; border-radius:8px; padding:10px; text-align:center;">
+          <div style="font-size:0.75em; color:#aaa; text-transform:uppercase;">📝 Redações</div>
+          <div style="font-size:1.35em; font-weight:900; color:#fff; margin-top:2px;">${data.length}</div>
+        </div>
+      `;
+      list.appendChild(kpiGrid);
+
+      // 3. GRÁFICO INTERATIVO DE EVOLUÇÃO (SVG NATIVO RESPONSIVO)
+      const chartBox = document.createElement('div');
+      chartBox.style.cssText = 'background:#141414; border:1px solid #2a2a2a; border-radius:10px; padding:14px 12px 10px 12px; margin-bottom:16px;';
+
+      const svgWidth = 620;
+      const svgHeight = 195;
+      const padLeft = 38;
+      const padRight = 24;
+      const padTop = 26;
+      const padBottom = 38;
+      const plotW = svgWidth - padLeft - padRight;
+      const plotH = svgHeight - padTop - padBottom;
+
+      const lowestScore = Math.min(...scores);
+      const minScale = lowestScore >= 70 ? 60 : (lowestScore >= 50 ? 40 : 0);
+      const maxScale = 100;
+
+      const getX = (i) => chrono.length === 1
+        ? padLeft + plotW / 2
+        : padLeft + (i / (chrono.length - 1)) * plotW;
+
+      const getY = (val) => {
+        const clamped = Math.max(minScale, Math.min(maxScale, val));
+        return padTop + plotH - ((clamped - minScale) / (maxScale - minScale)) * plotH;
+      };
+
+      const y100 = getY(100);
+      const y90 = getY(90);
+      const yBase = getY(minScale);
+
+      const pointsCoords = chrono.map((item, idx) => ({
+        x: getX(idx),
+        y: getY(Number(item.nota_total) || 0),
+        score: Number(item.nota_total) || 0,
+        dateShort: new Date(item.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+        sub: extractSubtotalsFromHistoryItem(item),
+        rawItem: item
+      }));
+
+      const polylineStr = pointsCoords.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+      const areaPolygonStr = pointsCoords.length > 1
+        ? `${pointsCoords[0].x.toFixed(1)},${yBase.toFixed(1)} ${polylineStr} ${pointsCoords[pointsCoords.length - 1].x.toFixed(1)},${yBase.toFixed(1)}`
+        : '';
+
+      let circlesSVG = '';
+      pointsCoords.forEach((p, idx) => {
+        const subText = (p.sub.gramatica !== null && p.sub.conteudo !== null)
+          ? `G:${p.sub.gramatica} C:${p.sub.conteudo}`
+          : '';
+        const dotColor = p.score >= 90 ? '#2ecc71' : '#FFD700';
+        circlesSVG += `
+          <g class="history-chart-point" data-idx="${idx}" style="cursor:pointer;">
+            <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="14" fill="transparent"></circle>
+            <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="5.5" fill="#111" stroke="${dotColor}" stroke-width="3"></circle>
+            <text x="${p.x.toFixed(1)}" y="${(p.y - 10).toFixed(1)}" fill="#FFD700" font-size="11.5" font-weight="900" text-anchor="middle">${p.score}</text>
+            <text x="${p.x.toFixed(1)}" y="${(svgHeight - 18).toFixed(1)}" fill="#bbb" font-size="10" text-anchor="middle">${p.dateShort}</text>
+            ${subText ? `<text x="${p.x.toFixed(1)}" y="${(svgHeight - 6).toFixed(1)}" fill="#777" font-size="8.5" text-anchor="middle">${subText}</text>` : ''}
+          </g>
+        `;
+      });
+
+      chartBox.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+          <span style="font-size:0.88em; font-weight:800; color:#FFD700;">
+            <i class="fas fa-chart-line"></i> Curva de Evolução nas Últimas Redações
+          </span>
+          <span style="font-size:0.75em; color:#2ecc71;">
+            ● Linha Verde Tracejada = Meta Excelência CRS (90+ pts) • Clique num ponto p/ abrir
+          </span>
+        </div>
+        <svg viewBox="0 0 ${svgWidth} ${svgHeight}" style="width:100%; height:auto; display:block; overflow:visible;">
+          <defs>
+            <linearGradient id="goldChartGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#FFD700" stop-opacity="0.32"/>
+              <stop offset="100%" stop-color="#FFD700" stop-opacity="0.0"/>
+            </linearGradient>
+          </defs>
+
+          <line x1="${padLeft}" y1="${y100}" x2="${svgWidth - padRight}" y2="${y100}" stroke="#2a2a2a" stroke-width="1" />
+          <text x="${padLeft - 6}" y="${y100 + 4}" fill="#666" font-size="10" text-anchor="end">100</text>
+
+          <line x1="${padLeft}" y1="${y90}" x2="${svgWidth - padRight}" y2="${y90}" stroke="rgba(46, 204, 113, 0.45)" stroke-dasharray="4,4" stroke-width="1.2" />
+          <text x="${padLeft - 6}" y="${y90 + 4}" fill="#2ecc71" font-size="10" font-weight="bold" text-anchor="end">90</text>
+
+          <line x1="${padLeft}" y1="${yBase}" x2="${svgWidth - padRight}" y2="${yBase}" stroke="#333" stroke-width="1" />
+          <text x="${padLeft - 6}" y="${yBase + 4}" fill="#666" font-size="10" text-anchor="end">${minScale}</text>
+
+          ${areaPolygonStr ? `<polygon points="${areaPolygonStr}" fill="url(#goldChartGrad)" />` : ''}
+          ${pointsCoords.length > 1 ? `<polyline fill="none" stroke="#FFD700" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="${polylineStr}" />` : ''}
+
+          ${circlesSVG}
+        </svg>
+      `;
+      list.appendChild(chartBox);
+
+      chartBox.querySelectorAll('.history-chart-point').forEach(el => {
+        el.addEventListener('click', () => {
+          const idx = parseInt(el.getAttribute('data-idx'), 10);
+          if (pointsCoords[idx]?.rawItem) {
+            openHistoryItemReport(pointsCoords[idx].rawItem);
+          }
+        });
+      });
+
+      // 4. CABEÇALHO DA LISTA + BOTÃO 🎯 PRINCIPAIS ERROS (RAIO-X) + LIMPAR HISTÓRICO
+      const listHeader = document.createElement('div');
+      listHeader.style.cssText = 'display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;';
+      listHeader.innerHTML = `
+        <span style="font-size:0.85em; font-weight:800; color:#F7EF8A; text-transform:uppercase; letter-spacing:0.5px;">
+          <i class="fas fa-list-ul"></i> Espelhos de Correção Salvos:
+        </span>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button id="btnOpenMainErrors" class="btn-gold-primary" style="padding:5px 12px; font-size:0.78em; border-radius:6px; text-transform:none;">
+            🎯 Principais Erros (Raio-X)
+          </button>
+          <button id="btnClearAllHistory" style="background:rgba(255, 77, 77, 0.12); color:#ff7675; border:1px solid rgba(255, 77, 77, 0.35); padding:5px 11px; border-radius:6px; font-size:0.78em; font-weight:bold; cursor:pointer;">
+            <i class="fas fa-trash"></i> Limpar Todo o Histórico
+          </button>
+        </div>
+      `;
+      list.appendChild(listHeader);
+
+      const mainErrorsBtn = listHeader.querySelector('#btnOpenMainErrors');
+      if (mainErrorsBtn) {
+        mainErrorsBtn.onclick = () => openMainErrorsModal();
+      }
+
+      const clearAllBtn = listHeader.querySelector('#btnClearAllHistory');
+      if (clearAllBtn) {
+        clearAllBtn.onclick = () => clearAllUserHistory(clearAllBtn);
+      }
+
+      // 5. LISTA DE CARTÕES COM BOTÃO INDIVIDUAL DE EXCLUIR
       data.forEach(item => {
         const div = document.createElement('div');
         div.className = 'criterion-card';
         div.style.cursor = 'pointer';
         const dateStr = new Date(item.created_at).toLocaleDateString('pt-BR');
+        const cleanBanca = typeof sanitizeBancaNameToCRS === 'function'
+          ? sanitizeBancaNameToCRS({ banca: item.banca })
+          : (item.banca || 'CRS / PMMG');
+        const sub = extractSubtotalsFromHistoryItem(item);
+        const subBadges = (sub.gramatica !== null && sub.conteudo !== null)
+          ? `<span style="color:#a8e6cf; background:rgba(46,204,113,0.1); padding:2px 8px; border-radius:4px; border:1px solid rgba(46,204,113,0.25); font-size:0.78em;">Gramática (Total 1): <strong>${sub.gramatica}/60</strong></span>
+             <span style="color:#F7EF8A; background:rgba(255,215,0,0.08); padding:2px 8px; border-radius:4px; border:1px solid rgba(255,215,0,0.25); font-size:0.78em;">Conteúdo (Total 2): <strong>${sub.conteudo}/40</strong></span>`
+          : '';
+
         div.innerHTML = `
-          <div class="criterion-header">
-            <span>${escapeHTML(item.banca)} — ${escapeHTML(item.tema)}</span>
-            <span style="color:#FFD700;">${item.nota_total} / ${item.nota_maxima} pts</span>
+          <div class="criterion-header" style="gap:10px; flex-wrap:wrap;">
+            <span style="flex:1; min-width:200px;">${escapeHTML(cleanBanca)} — ${escapeHTML(item.tema)}</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="color:#FFD700; font-size:1.05em; white-space:nowrap;">${item.nota_total} / ${item.nota_maxima} pts</span>
+              <button class="btn-delete-single-history" title="Excluir esta redação" style="background:rgba(255, 77, 77, 0.12); color:#ff7675; border:1px solid rgba(255, 77, 77, 0.35); padding:4px 9px; border-radius:6px; font-size:0.82em; cursor:pointer;">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
           </div>
-          <div style="font-size:0.82em; color:#888;">Corrigida em ${dateStr} via ${escapeHTML(item.motor_ia || 'IA')} (Clique para abrir)</div>
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:6px;">
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">${subBadges}</div>
+            <div style="font-size:0.8em; color:#888;">📅 ${dateStr} • ${escapeHTML(item.motor_ia || 'IA')}</div>
+          </div>
         `;
-        div.onclick = () => {
-          modal.style.display = 'none';
-          lastGradingResult = item.relatorio_json;
-          renderGradingReport(item.relatorio_json, item.motor_ia || 'Histórico');
-          goToStep(3);
-        };
+
+        const delBtn = div.querySelector('.btn-delete-single-history');
+        if (delBtn) {
+          delBtn.onclick = (e) => deleteSingleHistoryItem(item.id, delBtn, e);
+        }
+
+        div.onclick = () => openHistoryItemReport(item);
         list.appendChild(div);
       });
     }
